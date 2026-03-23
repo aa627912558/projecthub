@@ -8,7 +8,7 @@ export function Footer() {
           <div>
             <div className="flex items-center gap-2 font-bold text-lg text-gray-900 mb-4">
               <span className="text-accent">⬡</span>
-              <span>ProjectHub</span>
+              <span>项目派</span>
             </div>
             <p className="text-gray-500 text-sm">
               发现和分享有趣的项目。让每一个好项目都被看见。
@@ -62,7 +62,7 @@ export function Footer() {
         </div>
 
         <div className="mt-8 pt-8 border-t border-border text-center text-sm text-gray-500">
-          <p>© {new Date().getFullYear()} ProjectHub. 保留所有权利.</p>
+          <p>© {new Date().getFullYear()} 项目派. 保留所有权利.</p>
         </div>
       </div>
     </footer>

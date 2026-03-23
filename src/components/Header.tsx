@@ -20,7 +20,7 @@ export function Header({ user }: HeaderProps) {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 font-bold text-xl text-gray-900">
             <span className="text-accent">⬡</span>
-            <span>ProjectHub</span>
+            <span>ProjectHub 项目派</span>
           </Link>
 
           {/* Desktop Nav */}

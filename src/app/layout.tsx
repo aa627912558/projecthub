@@ -13,19 +13,19 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     metadataBase: new URL(siteUrl),
     title: {
-      default: 'ProjectHub - 发现和分享有趣的项目',
-      template: '%s | ProjectHub',
+      default: '项目派 - 发现和分享有趣的项目',
+      template: '%s | 项目派',
     },
-    description: 'ProjectHub 是一个开放的项目分享平台，让每一个好项目都被看见。',
+    description: '项目派是一个开放的项目分享平台，让每一个好项目都被看见。',
     keywords: ['项目分享', '开源项目', '产品推荐', '开发者作品'],
-    authors: [{ name: 'ProjectHub' }],
+    authors: [{ name: '项目派' }],
     openGraph: {
       type: 'website',
       locale: 'zh_CN',
       url: siteUrl,
-      siteName: 'ProjectHub',
-      title: 'ProjectHub - 发现和分享有趣的项目',
-      description: 'ProjectHub 是一个开放的项目分享平台，让每一个好项目都被看见。',
+      siteName: '项目派',
+      title: '项目派 - 发现和分享有趣的项目',
+      description: '项目派是一个开放的项目分享平台，让每一个好项目都被看见。',
     },
     twitter: {
       card: 'summary_large_image',
