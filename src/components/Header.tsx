@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { Menu, X, Github, User } from 'lucide-react'
 import type { Profile } from '@/types'
 import { cn } from '@/lib/utils'
-import { Logo } from './Logo'
+
 
 interface HeaderProps {
   user?: Profile | null
@@ -157,6 +157,13 @@ export function Header({ user }: HeaderProps) {
                 </div>
               )}
             </div>
+          </nav>
+        </div>
+      )}
+    </header>
+  )
+}
+   </div>
           </nav>
         </div>
       )}

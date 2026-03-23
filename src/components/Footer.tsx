@@ -7,7 +7,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
             <div className="flex items-center gap-2 font-bold text-lg text-gray-900 mb-4">
-              <span className="text-accent">⬡</span>
+              <img src="/logo.png" alt="项目派" style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
               <span>项目派</span>
             </div>
             <p className="text-gray-500 text-sm">
