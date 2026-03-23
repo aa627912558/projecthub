@@ -20,10 +20,10 @@ export function Header({ user }: HeaderProps) {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5">
-            <Logo size={30} />
+            <Logo size={36} />
             <span className="font-bold text-xl text-gray-900">
               <span className="text-accent">ProjectHub</span>
-              <span className="text-gray-400 font-normal ml-1">项目派</span>
+              <span className="text-gray-600 font-normal ml-1">项目派</span>
             </span>
           </Link>
 
