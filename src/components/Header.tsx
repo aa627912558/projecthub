@@ -23,7 +23,7 @@ export function Header({ user }: HeaderProps) {
             <img src="/logo.png" alt="项目派" style={{ width: '60px', height: '60px', objectFit: 'contain' }} />
             <span className="font-bold text-xl text-gray-900">
               <span className="text-accent">ProjectHub</span>
-              <span className="text-gray-600 font-normal ml-1">项目派</span>
+              <span className="text-accent/70 font-normal ml-1">项目派</span>
             </span>
           </Link>
 
