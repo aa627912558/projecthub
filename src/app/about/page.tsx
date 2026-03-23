@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { Mail, Github } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: '关于',
@@ -37,6 +38,31 @@ export default function AboutPage() {
             <li>AI 友好的结构化数据，让大模型能理解你的项目</li>
             <li>项目审核机制，确保内容质量</li>
           </ul>
+        </section>
+
+        <section>
+          <h2 className="text-xl font-semibold text-gray-900 mb-3">联系我们</h2>
+          <p className="text-gray-700 mb-4">
+            有任何问题或建议，欢迎通过以下方式联系我们：
+          </p>
+          <div className="flex flex-wrap gap-4">
+            <a
+              href="mailto:hello@projecthub.dev"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-surface-secondary rounded-btn text-gray-700 hover:bg-accent-light hover:text-accent transition-colors"
+            >
+              <Mail className="w-4 h-4" />
+              hello@projecthub.dev
+            </a>
+            <a
+              href="https://github.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-surface-secondary rounded-btn text-gray-700 hover:bg-accent-light hover:text-accent transition-colors"
+            >
+              <Github className="w-4 h-4" />
+              GitHub
+            </a>
+          </div>
         </section>
 
         <section>
