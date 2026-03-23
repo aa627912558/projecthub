@@ -1,21 +1,20 @@
 import type { Metadata } from 'next'
-import { Mail, Github, Twitter } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: '关于',
-  description: '了解 ProjectHub — 一个开放的项目分享平台',
+  description: '了解项目派 — 一个开放的项目分享平台',
 }
 
 export default function AboutPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">关于 ProjectHub</h1>
+      <h1 className="text-3xl font-bold text-gray-900 mb-8">关于 ProjectHub 项目派</h1>
 
       <div className="prose prose-gray max-w-none space-y-6">
         <section>
           <h2 className="text-xl font-semibold text-gray-900 mb-3">我们是谁</h2>
           <p className="text-gray-700 leading-relaxed">
-            ProjectHub（项目阁）是一个开放的项目分享平台。我们相信每一个好项目都值得被看见，
+            ProjectHub 项目派是一个开放的项目分享平台。我们相信每一个好项目都值得被看见，
             无论是开发者的小工具、设计师的作品集，还是创业者的产品原型。
           </p>
         </section>
@@ -38,40 +37,6 @@ export default function AboutPage() {
             <li>AI 友好的结构化数据，让大模型能理解你的项目</li>
             <li>项目审核机制，确保内容质量</li>
           </ul>
-        </section>
-
-        <section>
-          <h2 className="text-xl font-semibold text-gray-900 mb-3">联系我们</h2>
-          <p className="text-gray-700 mb-4">
-            有任何问题或建议，欢迎通过以下方式联系我们：
-          </p>
-          <div className="flex flex-wrap gap-4">
-            <a
-              href="mailto:hello@projecthub.dev"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-surface-secondary rounded-btn text-gray-700 hover:bg-accent-light hover:text-accent transition-colors"
-            >
-              <Mail className="w-4 h-4" />
-              hello@projecthub.dev
-            </a>
-            <a
-              href="https://github.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-surface-secondary rounded-btn text-gray-700 hover:bg-accent-light hover:text-accent transition-colors"
-            >
-              <Github className="w-4 h-4" />
-              GitHub
-            </a>
-            <a
-              href="https://twitter.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-surface-secondary rounded-btn text-gray-700 hover:bg-accent-light hover:text-accent transition-colors"
-            >
-              <Twitter className="w-4 h-4" />
-              Twitter
-            </a>
-          </div>
         </section>
 
         <section>
