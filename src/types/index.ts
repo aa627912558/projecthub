@@ -19,10 +19,19 @@ export interface Project {
   tags: string[]
   author_id: string
   author?: Profile
-  status: 'pending' | 'published' | 'rejected'
+  status: 'pending' | 'published' | 'rejected' | 'pending_review'
   rejection_reason?: string
+  flagged_content?: FlaggedItem[] | null
+  flagged_reason?: string | null
   created_at: string
   published_at?: string
+}
+
+export interface FlaggedItem {
+  type: 'phone' | 'wechat' | 'qq' | 'email' | 'url' | 'address' | 'other'
+  original: string
+  replacement: string
+  field: string
 }
 
 export interface ProjectFormData {
