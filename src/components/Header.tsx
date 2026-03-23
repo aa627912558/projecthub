@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { Menu, X, Github, User } from 'lucide-react'
 import type { Profile } from '@/types'
 import { cn } from '@/lib/utils'
+import { Logo } from './Logo'
 
 interface HeaderProps {
   user?: Profile | null
@@ -18,9 +19,12 @@ export function Header({ user }: HeaderProps) {
       <div className="max-w-content mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 font-bold text-xl text-gray-900">
-            <span className="text-accent">⬡</span>
-            <span>ProjectHub 项目派</span>
+          <Link href="/" className="flex items-center gap-2.5">
+            <Logo size={30} />
+            <span className="font-bold text-xl text-gray-900">
+              <span className="text-accent">ProjectHub</span>
+              <span className="text-gray-400 font-normal ml-1">项目派</span>
+            </span>
           </Link>
 
           {/* Desktop Nav */}
