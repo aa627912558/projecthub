@@ -26,12 +26,11 @@ const DEMO_PROJECT: Project = {
   status: 'published',
   published_at: '2026-03-20T10:00:00Z',
   created_at: '2026-03-20T10:00:00Z',
-  updated_at: '2026-03-20T10:00:00Z',
   author: {
     id: 'demo-user',
     username: 'techguy',
     email: 'demo@example.com',
-    avatar_url: null,
+    avatar_url: undefined,
     is_admin: false,
     created_at: '2026-03-01T00:00:00Z',
   },

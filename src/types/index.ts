@@ -12,6 +12,7 @@ export interface Project {
   slug: string
   title: string
   description: string
+  content?: string
   cover_image: string
   project_url: string
   gallery: string[]
