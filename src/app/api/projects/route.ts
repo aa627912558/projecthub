@@ -104,25 +104,50 @@ export async function POST(req: NextRequest) {
       ? null 
       : JSON.stringify(moderationResult.flaggedContent)
 
-    const { data, error } = await adminClient
+    // Build insert object
+    const insertData = {
+      slug,
+      title: moderationResult.sanitizedContent.title,
+      description: moderationResult.sanitizedContent.description,
+      cover_image: coverImage,
+      project_url: result.data.project_url || '',
+      tags: result.data.tags || [],
+      gallery: result.data.gallery || [],
+      author_id: user.id,
+      status,
+      flagged_content: flaggedContent,
+      flagged_reason: moderationResult.isClean ? null : moderationResult.reason,
+      published_at: status === 'published' ? new Date().toISOString() : null,
+    }
+
+    let data, error
+
+    // Try with category first
+    const insertWithCategory = { ...insertData, category: result.data.category || '副业' }
+    const { data: d1, error: e1 } = await adminClient
       .from('projects')
-      .insert({
-        slug,
-        title: moderationResult.sanitizedContent.title,
-        description: moderationResult.sanitizedContent.description,
-        category: result.data.category,
-        cover_image: coverImage,
-        project_url: result.data.project_url || '',
-        tags: result.data.tags || [],
-        gallery: result.data.gallery || [],
-        author_id: user.id,
-        status,
-        flagged_content: flaggedContent,
-        flagged_reason: moderationResult.isClean ? null : moderationResult.reason,
-        published_at: status === 'published' ? new Date().toISOString() : null,
-      })
+      .insert(insertWithCategory)
       .select('slug, status')
       .single()
+
+    if (e1) {
+      // If error is about missing column, retry without category
+      if (e1.message.includes('category') || e1.code === '42703') {
+        console.log('[Category column missing, retrying without category]')
+        const { data: d2, error: e2 } = await adminClient
+          .from('projects')
+          .insert(insertData)
+          .select('slug, status')
+          .single()
+        data = d2
+        error = e2
+      } else {
+        data = d1
+        error = e1
+      }
+    } else {
+      data = d1
+    }
 
     if (error) {
       console.error('[Project Insert Error]', error)

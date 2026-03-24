@@ -24,7 +24,7 @@ export const projectSchema = z.object({
     .string()
     .min(10, '详细介绍至少10字')
     .max(10000, '详细介绍最多10000字'),
-  category: z.string().min(1, '请选择项目分类'),
+  category: z.string().optional().default('副业'),
   cover_image: z.string().url('请输入有效的封面图URL').optional().or(z.literal('').transform(() => undefined)),
   project_url: z.string().url('请输入有效的项目链接').optional().or(z.literal('').transform(() => undefined)),
   tags: z
