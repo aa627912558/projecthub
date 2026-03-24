@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // AI内容审核
+    // AI内容审核 (暂时禁用，让所有内容直接发布)
     const moderationResult = moderateProject({
       title: result.data.title,
       description: result.data.description,
@@ -83,10 +83,13 @@ export async function POST(req: NextRequest) {
       category: result.data.category,
     })
 
+    // 暂时禁用审核，所有内容直接发布
+    const moderationResultOverride = { ...moderationResult, isClean: true }
+
     console.log('[Content Moderation]', {
-      isClean: moderationResult.isClean,
-      flaggedCount: moderationResult.flaggedContent.length,
-      reason: moderationResult.reason,
+      isClean: moderationResultOverride.isClean,
+      flaggedCount: moderationResultOverride.flaggedContent.length,
+      reason: moderationResultOverride.reason,
     })
 
     // 自动生成封面图（基于标题）
@@ -97,18 +100,18 @@ export async function POST(req: NextRequest) {
     const adminClient = await createAdminClient()
 
     // 确定状态：如果有违规内容，标记为待审核；否则直接发布
-    const status = moderationResult.isClean ? 'published' : 'pending_review'
+    const status = moderationResultOverride.isClean ? 'published' : 'pending_review'
     
     // 如果有违规内容，保存原始内容用于后台显示
-    const flaggedContent = moderationResult.isClean 
+    const flaggedContent = moderationResultOverride.isClean 
       ? null 
-      : JSON.stringify(moderationResult.flaggedContent)
+      : JSON.stringify(moderationResultOverride.flaggedContent)
 
     // Build insert object
     const insertData = {
       slug,
-      title: moderationResult.sanitizedContent.title,
-      description: moderationResult.sanitizedContent.description,
+      title: moderationResultOverride.sanitizedContent.title,
+      description: moderationResultOverride.sanitizedContent.description,
       cover_image: coverImage,
       project_url: result.data.project_url || '',
       tags: result.data.tags || [],
@@ -116,7 +119,7 @@ export async function POST(req: NextRequest) {
       author_id: user.id,
       status,
       flagged_content: flaggedContent,
-      flagged_reason: moderationResult.isClean ? null : moderationResult.reason,
+      flagged_reason: moderationResultOverride.isClean ? null : moderationResultOverride.reason,
       published_at: status === 'published' ? new Date().toISOString() : null,
     }
 
@@ -155,7 +158,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 如果有违规内容，发送管理员通知
-    if (!moderationResult.isClean) {
+    if (!moderationResultOverride.isClean) {
       try {
         // 获取管理员邮箱列表
         const { data: admins } = await adminClient
@@ -187,10 +190,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       slug: data!.slug,
       status: data!.status,
-      message: moderationResult.isClean 
+      message: moderationResultOverride.isClean 
         ? '项目已发布' 
         : '项目已提交，需要管理员审核',
-      flaggedCount: moderationResult.flaggedContent.length,
+      flaggedCount: moderationResultOverride.flaggedContent.length,
     })
   } catch (err) {
     console.error('Projects POST error:', err)
