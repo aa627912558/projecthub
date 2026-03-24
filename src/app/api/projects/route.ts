@@ -11,6 +11,7 @@ export async function GET(req: NextRequest) {
     const pageSize = parseInt(searchParams.get('pageSize') || '12')
     const q = searchParams.get('q')
     const tag = searchParams.get('tag')
+    const category = searchParams.get('category')
     const showAll = searchParams.get('all') === '1'
 
     const supabase = await createServerSupabaseClient()
@@ -30,6 +31,10 @@ export async function GET(req: NextRequest) {
 
     if (tag) {
       query = query.contains('tags', [tag])
+    }
+
+    if (category) {
+      query = query.eq('category', category)
     }
 
     const { data, error, count } = await query

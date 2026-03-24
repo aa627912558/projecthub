@@ -7,6 +7,7 @@ interface SearchParams {
   q?: string
   tag?: string
   page?: string
+  category?: string
 }
 
 // Demo data when Supabase is not configured
@@ -21,6 +22,7 @@ const DEMO_PROJECTS: Project[] = [
     project_url: 'https://example.com/ai-photo',
     gallery: [],
     tags: ['AI', '图片处理', '开源'],
+    category: 'AI项目',
     author_id: 'demo-user',
     status: 'published',
     created_at: '2026-03-20T10:00:00Z',
@@ -44,6 +46,7 @@ const DEMO_PROJECTS: Project[] = [
     project_url: 'https://cursor.sh',
     gallery: [],
     tags: ['AI', '开发工具', '代码编辑器'],
+    category: 'AI项目',
     author_id: 'demo-user-2',
     status: 'published',
     created_at: '2026-03-19T15:30:00Z',
@@ -67,6 +70,7 @@ const DEMO_PROJECTS: Project[] = [
     project_url: 'https://notiontools.dev',
     gallery: [],
     tags: ['Notion', '效率工具', '无代码'],
+    category: '副业',
     author_id: 'demo-user-3',
     status: 'published',
     created_at: '2026-03-18T09:00:00Z',
@@ -90,6 +94,7 @@ const DEMO_PROJECTS: Project[] = [
     project_url: 'https://voice2json.org',
     gallery: [],
     tags: ['语音助手', '开源', 'JSON'],
+    category: 'AI项目',
     author_id: 'demo-user-4',
     status: 'published',
     created_at: '2026-03-17T14:00:00Z',
@@ -125,6 +130,9 @@ async function getProjects(searchParams: SearchParams) {
     if (searchParams.tag) {
       filtered = filtered.filter(p => p.tags.includes(searchParams.tag!))
     }
+    if (searchParams.category) {
+      filtered = filtered.filter(p => p.category === searchParams.category)
+    }
     return { projects: filtered, total: filtered.length, page: 1, pageSize: 12, isDemo: true }
   }
 
@@ -146,6 +154,10 @@ async function getProjects(searchParams: SearchParams) {
 
   if (searchParams.tag) {
     query = query.contains('tags', [searchParams.tag])
+  }
+
+  if (searchParams.category) {
+    query = query.eq('category', searchParams.category)
   }
 
   const { data, count } = await query

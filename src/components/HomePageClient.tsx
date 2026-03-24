@@ -10,7 +10,7 @@ import type { Project } from '@/types'
 interface HomePageClientProps {
   initialProjects: Project[]
   initialTags: string[]
-  initialSearchParams: { q?: string; tag?: string; page?: string }
+  initialSearchParams: { q?: string; tag?: string; page?: string; category?: string }
   total: number
   page: number
   pageSize: number
@@ -30,7 +30,16 @@ export function HomePageClient({
   const handleTagClick = (tag: string | null) => {
     const params = new URLSearchParams()
     if (initialSearchParams.q) params.set('q', initialSearchParams.q)
+    if (initialSearchParams.category) params.set('category', initialSearchParams.category)
     if (tag) params.set('tag', tag)
+    router.push(`/?${params.toString()}`)
+  }
+
+  const handleCategoryClick = (category: string | null) => {
+    const params = new URLSearchParams()
+    if (initialSearchParams.q) params.set('q', initialSearchParams.q)
+    if (initialSearchParams.tag) params.set('tag', initialSearchParams.tag)
+    if (category) params.set('category', category)
     router.push(`/?${params.toString()}`)
   }
 
@@ -41,6 +50,7 @@ export function HomePageClient({
     const params = new URLSearchParams()
     if (q) params.set('q', q)
     if (initialSearchParams.tag) params.set('tag', initialSearchParams.tag)
+    if (initialSearchParams.category) params.set('category', initialSearchParams.category)
     router.push(`/?${params.toString()}`)
   }
 
@@ -72,12 +82,39 @@ export function HomePageClient({
         </div>
       </section>
 
-      {/* Tags filter */}
-      {initialTags.length > 0 && (
-        <section className="border-b border-border sticky top-16 bg-white/80 backdrop-blur-md z-40">
-          <div className="max-w-content mx-auto px-4 sm:px-6 py-3">
-            <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
-              <Filter className="w-4 h-4 text-gray-400 flex-shrink-0" />
+      {/* Category filter */}
+      <section className="border-b border-border sticky top-16 bg-white/80 backdrop-blur-md z-40">
+        <div className="max-w-content mx-auto px-4 sm:px-6">
+          <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide py-2">
+            <button
+              onClick={() => handleCategoryClick(null)}
+              className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
+                !initialSearchParams.category
+                  ? 'bg-accent text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              全部
+            </button>
+            {['实体项目', '网创项目', '副业', 'AI项目'].map((cat) => (
+              <button
+                key={cat}
+                onClick={() => handleCategoryClick(initialSearchParams.category === cat ? null : cat)}
+                className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
+                  initialSearchParams.category === cat
+                    ? 'bg-accent text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+
+          {/* Tags filter row */}
+          {initialTags.length > 0 && (
+            <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-2">
+              <Filter className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
               <button
                 onClick={() => handleTagClick(null)}
                 className={`flex-shrink-0 px-2.5 py-0.5 rounded-full text-xs font-medium transition-colors ${
@@ -100,9 +137,9 @@ export function HomePageClient({
                 />
               ))}
             </div>
-          </div>
-        </section>
-      )}
+          )}
+        </div>
+      </section>
 
       {/* Projects Grid */}
       <section className="max-w-content mx-auto px-4 sm:px-6 py-8">
@@ -112,6 +149,9 @@ export function HomePageClient({
               搜索结果: <span className="font-semibold">&ldquo;{initialSearchParams.q}&rdquo;</span>
               {initialSearchParams.tag && (
                 <>，标签: <span className="font-semibold">{initialSearchParams.tag}</span></>
+              )}
+              {initialSearchParams.category && (
+                <>，分类: <span className="font-semibold">{initialSearchParams.category}</span></>
               )}
               ，共 {total} 个项目
             </p>
@@ -145,6 +185,7 @@ export function HomePageClient({
                       const params = new URLSearchParams()
                       if (initialSearchParams.q) params.set('q', initialSearchParams.q)
                       if (initialSearchParams.tag) params.set('tag', initialSearchParams.tag)
+                      if (initialSearchParams.category) params.set('category', initialSearchParams.category)
                       params.set('page', String(page - 1))
                       router.push(`/?${params.toString()}`)
                     }}
@@ -162,6 +203,7 @@ export function HomePageClient({
                       const params = new URLSearchParams()
                       if (initialSearchParams.q) params.set('q', initialSearchParams.q)
                       if (initialSearchParams.tag) params.set('tag', initialSearchParams.tag)
+                      if (initialSearchParams.category) params.set('category', initialSearchParams.category)
                       params.set('page', String(page + 1))
                       router.push(`/?${params.toString()}`)
                     }}
