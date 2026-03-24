@@ -94,19 +94,24 @@ export function HomePageClient({
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
-              全部
+              全部项目
             </button>
-            {['实体项目', '网创项目', '副业', 'AI项目'].map((cat) => (
+            {[
+              { value: '实体项目', label: '实体类' },
+              { value: '网创项目', label: '网创类' },
+              { value: '副业', label: '副业类' },
+              { value: 'AI项目', label: 'AI类' },
+            ].map(({ value, label }) => (
               <button
-                key={cat}
-                onClick={() => handleCategoryClick(initialSearchParams.category === cat ? null : cat)}
+                key={value}
+                onClick={() => handleCategoryClick(initialSearchParams.category === value ? null : value)}
                 className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
-                  initialSearchParams.category === cat
+                  initialSearchParams.category === value
                     ? 'bg-accent text-white'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
-                {cat}
+                {label}
               </button>
             ))}
           </div>
