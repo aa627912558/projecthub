@@ -2,8 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { Upload, X, Plus } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { Button } from '@/components/Button'
 import { Input, Textarea } from '@/components/Input'
 import { TagBadge } from '@/components/TagBadge'
@@ -18,10 +17,7 @@ export default function SubmitPage() {
   const [form, setForm] = useState({
     title: '',
     description: '',
-    cover_image: '',
-    project_url: '',
     tags: [] as string[],
-    gallery: [] as string[],
   })
 
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -44,24 +40,6 @@ export default function SubmitPage() {
 
   const handleRemoveTag = (tag: string) => {
     setForm({ ...form, tags: form.tags.filter((t) => t !== tag) })
-  }
-
-  const handleGalleryAdd = (url: string) => {
-    if (!url) return
-    if (!url.startsWith('http')) {
-      setError('请输入有效的URL')
-      return
-    }
-    if (form.gallery.length >= 10) {
-      setError('最多添加10张截图')
-      return
-    }
-    setForm({ ...form, gallery: [...form.gallery, url] })
-    setError('')
-  }
-
-  const handleRemoveGallery = (idx: number) => {
-    setForm({ ...form, gallery: form.gallery.filter((_, i) => i !== idx) })
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -133,36 +111,6 @@ export default function SubmitPage() {
           rows={12}
         />
 
-        <Input
-          label="封面图 URL *"
-          placeholder="https://example.com/cover.jpg"
-          value={form.cover_image}
-          onChange={(e) => setForm({ ...form, cover_image: e.target.value })}
-          error={errors.cover_image}
-        />
-
-        {form.cover_image && (
-          <div className="relative w-full aspect-video rounded-card overflow-hidden bg-surface-secondary max-w-sm">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={form.cover_image}
-              alt="封面预览"
-              className="object-cover w-full h-full"
-              onError={(e) => {
-                e.currentTarget.style.display = 'none'
-              }}
-            />
-          </div>
-        )}
-
-        <Input
-          label="项目链接 *"
-          placeholder="https://github.com/your/project"
-          value={form.project_url}
-          onChange={(e) => setForm({ ...form, project_url: e.target.value })}
-          error={errors.project_url}
-        />
-
         {/* Tags */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -201,47 +149,6 @@ export default function SubmitPage() {
               ))}
             </div>
           )}
-        </div>
-
-        {/* Gallery */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
-            截图 Gallery（最多10张）
-          </label>
-          {form.gallery.length > 0 && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-3">
-              {form.gallery.map((url, idx) => (
-                <div
-                  key={idx}
-                  className="relative aspect-video rounded-card overflow-hidden bg-surface-secondary group"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={url}
-                    alt={`截图 ${idx + 1}`}
-                    className="object-cover w-full h-full"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveGallery(idx)}
-                    className="absolute top-1 right-1 p-1 bg-black/50 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-          <Input
-            placeholder="粘贴截图URL后按回车添加"
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault()
-                handleGalleryAdd((e.target as HTMLInputElement).value)
-                ;(e.target as HTMLInputElement).value = ''
-              }
-            }}
-          />
         </div>
 
         <div className="pt-4">

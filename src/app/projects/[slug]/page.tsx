@@ -122,8 +122,8 @@ export default async function ProjectPage({
     },
     datePublished: project.published_at || project.created_at,
     keywords: project.tags.join(', '),
-    image: project.cover_image,
-    url: project.project_url,
+    image: project.cover_image || `https://image.pollinations.ai/prompt/${encodeURIComponent(project.title)}?width=1200&height=630&nologo=true`,
+    url: project.project_url || siteUrl + `/projects/${slug}`,
   }
 
   return (
@@ -146,7 +146,7 @@ export default async function ProjectPage({
         {/* Cover */}
         <div className="relative w-full aspect-video rounded-card overflow-hidden mb-8 bg-surface-secondary">
           <Image
-            src={project.cover_image}
+            src={project.cover_image || `https://image.pollinations.ai/prompt/${encodeURIComponent(project.title)}?width=1200&height=630&nologo=true`}
             alt={project.title}
             fill
             className="object-cover"
@@ -186,15 +186,17 @@ export default async function ProjectPage({
           )}
 
           {/* Project Link */}
-          <a
-            href={project.project_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 mt-6 px-6 py-3 bg-accent text-white rounded-btn font-medium hover:bg-accent-hover transition-colors"
-          >
-            访问项目
-            <ExternalLink className="w-4 h-4" />
-          </a>
+          {project.project_url && (
+            <a
+              href={project.project_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 mt-6 px-6 py-3 bg-accent text-white rounded-btn font-medium hover:bg-accent-hover transition-colors"
+            >
+              访问项目
+              <ExternalLink className="w-4 h-4" />
+            </a>
+          )}
         </header>
 
         {/* Gallery */}
@@ -228,15 +230,17 @@ export default async function ProjectPage({
 
         {/* Footer */}
         <footer className="pt-8 border-t border-border">
-          <a
-            href={project.project_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-accent text-white rounded-btn font-medium hover:bg-accent-hover transition-colors"
-          >
-            访问项目
-            <ExternalLink className="w-4 h-4" />
-          </a>
+          {project.project_url && (
+            <a
+              href={project.project_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-accent text-white rounded-btn font-medium hover:bg-accent-hover transition-colors"
+            >
+              访问项目
+              <ExternalLink className="w-4 h-4" />
+            </a>
+          )}
         </footer>
       </article>
     </>

@@ -17,7 +17,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
       {/* Cover Image */}
       <div className="relative aspect-video overflow-hidden bg-surface-secondary">
         <Image
-          src={project.cover_image}
+          src={project.cover_image || `https://image.pollinations.ai/prompt/${encodeURIComponent(project.title)}?width=800&height=450&nologo=true`}
           alt={project.title}
           fill
           className="object-cover transition-transform duration-300 group-hover:scale-105"

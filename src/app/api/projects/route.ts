@@ -73,8 +73,8 @@ export async function POST(req: NextRequest) {
     const moderationResult = moderateProject({
       title: result.data.title,
       description: result.data.description,
-      project_url: result.data.project_url,
-      cover_image: result.data.cover_image,
+      project_url: result.data.project_url || '',
+      cover_image: result.data.cover_image || '',
     })
 
     console.log('[Content Moderation]', {
@@ -82,6 +82,10 @@ export async function POST(req: NextRequest) {
       flaggedCount: moderationResult.flaggedContent.length,
       reason: moderationResult.reason,
     })
+
+    // 自动生成封面图（基于标题）
+    const encodedTitle = encodeURIComponent(result.data.title)
+    const coverImage = result.data.cover_image || `https://image.pollinations.ai/prompt/${encodedTitle}?width=1200&height=630&seed=${Date.now()}&nologo=true`
 
     const slug = generateSlug(result.data.title)
     const adminClient = await createAdminClient()
@@ -100,8 +104,8 @@ export async function POST(req: NextRequest) {
         slug,
         title: moderationResult.sanitizedContent.title,
         description: moderationResult.sanitizedContent.description,
-        cover_image: moderationResult.sanitizedContent.cover_image,
-        project_url: moderationResult.sanitizedContent.project_url,
+        cover_image: coverImage,
+        project_url: result.data.project_url || '',
         tags: result.data.tags || [],
         gallery: result.data.gallery || [],
         author_id: user.id,
