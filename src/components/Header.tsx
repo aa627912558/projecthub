@@ -163,10 +163,3 @@ export function Header({ user }: HeaderProps) {
     </header>
   )
 }
-   </div>
-          </nav>
-        </div>
-      )}
-    </header>
-  )
-}
