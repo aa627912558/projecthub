@@ -37,7 +37,7 @@ export default function SubmitPage() {
     const result = projectSchema.safeParse(form)
     if (!result.success) {
       const fieldErrors: Record<string, string> = {}
-      result.error.errors.forEach((err) => {
+      result.error.errors.forEach((err: { path: (string | number)[]; message: string }) => {
         if (err.path[0]) {
           fieldErrors[err.path[0] as string] = err.message
         }

@@ -1,3 +1,5 @@
+import { z } from 'zod'
+
 // Custom refine for username: numbers cannot exceed half the total length
 const usernameValidation = z.string()
   .min(2, '用户名至少2个字符')

@@ -2,16 +2,16 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { Check, X, Trash2, AlertCircle, Eye, EyeOff, RefreshCw } from 'lucide-react'
+import { Check, X, Trash2, AlertCircle, Eye, RefreshCw, LogOut } from 'lucide-react'
 import { Button } from '@/components/Button'
 import { Modal } from '@/components/Modal'
-import type { Project, Profile, FlaggedItem } from '@/types'
+import type { Project, FlaggedItem } from '@/types'
 import { formatDate } from '@/lib/utils'
 import { getFlagTypeName } from '@/lib/moderation'
 
 export default function AdminPage() {
   const router = useRouter()
-  const [user, setUser] = useState<Profile | null>(null)
+  const [admin, setAdmin] = useState<{ id: string; username: string } | null>(null)
   const [pending, setPending] = useState<Project[]>([])
   const [allProjects, setAllProjects] = useState<Project[]>([])
   const [loading, setLoading] = useState(true)
@@ -23,20 +23,21 @@ export default function AdminPage() {
   const fetchData = useCallback(async () => {
     try {
       const [meRes, pendingRes, allRes] = await Promise.all([
-        fetch('/api/auth/me'),
+        fetch('/api/admin/me'),
         fetch('/api/admin/pending'),
         fetch('/api/projects?all=1'),
       ])
 
-      const meData = await meRes.json()
-      if (!meRes.ok || !meData?.is_admin) {
-        setError('无权限访问')
+      if (!meRes.ok) {
+        router.replace('/admin/login')
         return
       }
-      setUser(meData)
+
+      const meData = await meRes.json()
+      setAdmin(meData)
 
       const pendingData = await pendingRes.json()
-      setPending(pendingData || [])
+      setPending(Array.isArray(pendingData) ? pendingData : (pendingData.data || []))
 
       const allData = await allRes.json()
       setAllProjects(allData.data || [])
@@ -45,11 +46,16 @@ export default function AdminPage() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [router])
 
   useEffect(() => {
     fetchData()
   }, [fetchData])
+
+  const handleLogout = async () => {
+    await fetch('/api/admin/logout', { method: 'POST' })
+    router.replace('/admin/login')
+  }
 
   const handleApprove = async (id: string) => {
     setActionLoading(id)
@@ -138,10 +144,23 @@ export default function AdminPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
-      <h1 className="text-3xl font-bold text-gray-900 mb-2">管理后台</h1>
-      <p className="text-gray-500 mb-8">
-        欢迎，{user?.username}
-      </p>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">管理后台</h1>
+          <p className="text-gray-500 mt-1">
+            欢迎，{admin?.username}
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Button variant="secondary" size="sm" onClick={() => router.push('/')}>
+            ← 返回首页
+          </Button>
+          <Button variant="secondary" size="sm" onClick={handleLogout}>
+            <LogOut className="w-4 h-4" />
+            退出登录
+          </Button>
+        </div>
+      </div>
 
       {/* AI Flagged - 需要管理员审核 */}
       {pendingReview.length > 0 && (
