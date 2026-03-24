@@ -31,6 +31,18 @@ export function Header({ user }: HeaderProps) {
             <Link href="/" className="text-gray-600 hover:text-accent transition-colors">
               首页
             </Link>
+            <Link href="/?category=实体项目" className="text-gray-600 hover:text-accent transition-colors">
+              实体项目
+            </Link>
+            <Link href="/?category=网创项目" className="text-gray-600 hover:text-accent transition-colors">
+              网创项目
+            </Link>
+            <Link href="/?category=副业" className="text-gray-600 hover:text-accent transition-colors">
+              副业
+            </Link>
+            <Link href="/?category=AI项目" className="text-gray-600 hover:text-accent transition-colors">
+              AI项目
+            </Link>
             <Link href="/about" className="text-gray-600 hover:text-accent transition-colors">
               关于
             </Link>
@@ -101,6 +113,34 @@ export function Header({ user }: HeaderProps) {
               onClick={() => setMobileOpen(false)}
             >
               首页
+            </Link>
+            <Link
+              href="/?category=实体项目"
+              className="block text-gray-700 hover:text-accent"
+              onClick={() => setMobileOpen(false)}
+            >
+              实体项目
+            </Link>
+            <Link
+              href="/?category=网创项目"
+              className="block text-gray-700 hover:text-accent"
+              onClick={() => setMobileOpen(false)}
+            >
+              网创项目
+            </Link>
+            <Link
+              href="/?category=副业"
+              className="block text-gray-700 hover:text-accent"
+              onClick={() => setMobileOpen(false)}
+            >
+              副业
+            </Link>
+            <Link
+              href="/?category=AI项目"
+              className="block text-gray-700 hover:text-accent"
+              onClick={() => setMobileOpen(false)}
+            >
+              AI项目
             </Link>
             <Link
               href="/about"
