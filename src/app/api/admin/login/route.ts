@@ -6,7 +6,6 @@ import { SignJWT } from 'jose'
 const ADMIN_SESSION_COOKIE = 'admin_session'
 const SESSION_EXPIRY_DAYS = 7
 
-// Use a secret for JWT signing - in production this should be an env var
 const getSecret = () => {
   const secret = process.env.ADMIN_SESSION_SECRET || 'projecthub-admin-secret-change-in-production'
   return new TextEncoder().encode(secret)
@@ -21,6 +20,7 @@ export async function POST(request: Request) {
     }
 
     const supabase = await createAdminClient()
+
     const { data: admin } = await supabase
       .from('admins')
       .select('*')
