@@ -149,9 +149,9 @@ export async function POST(req: NextRequest) {
       data = d1
     }
 
-    if (error) {
+    if (error || !data) {
       console.error('[Project Insert Error]', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return NextResponse.json({ error: error?.message || 'Unknown error' }, { status: 500 })
     }
 
     // 如果有违规内容，发送管理员通知
@@ -185,8 +185,8 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({
-      slug: data.slug,
-      status: data.status,
+      slug: data!.slug,
+      status: data!.status,
       message: moderationResult.isClean 
         ? '项目已发布' 
         : '项目已提交，需要管理员审核',
