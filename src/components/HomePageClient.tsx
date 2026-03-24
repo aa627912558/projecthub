@@ -85,10 +85,10 @@ export function HomePageClient({
       {/* Category filter */}
       <section className="border-b border-border sticky top-16 bg-white/80 backdrop-blur-md z-40">
         <div className="max-w-content mx-auto px-4 sm:px-6">
-          <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide py-2">
+          <div className="flex items-center gap-0.5 overflow-x-auto scrollbar-hide py-1.5">
             <button
               onClick={() => handleCategoryClick(null)}
-              className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
+              className={`flex-shrink-0 px-3 py-1 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
                 !initialSearchParams.category
                   ? 'bg-accent text-white'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -105,7 +105,7 @@ export function HomePageClient({
               <button
                 key={value}
                 onClick={() => handleCategoryClick(initialSearchParams.category === value ? null : value)}
-                className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
+                className={`flex-shrink-0 px-3 py-1 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
                   initialSearchParams.category === value
                     ? 'bg-accent text-white'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -118,8 +118,8 @@ export function HomePageClient({
 
           {/* Tags filter row */}
           {initialTags.length > 0 && (
-            <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-2">
-              <Filter className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+            <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide pb-1.5">
+              <Filter className="w-3 h-3 text-gray-400 flex-shrink-0" />
               <button
                 onClick={() => handleTagClick(null)}
                 className={`flex-shrink-0 px-2.5 py-0.5 rounded-full text-xs font-medium transition-colors ${
