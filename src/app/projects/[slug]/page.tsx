@@ -6,6 +6,7 @@ import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { MarkdownRenderer } from '@/components/MarkdownRenderer'
 import { TagBadge } from '@/components/TagBadge'
 import { formatDate } from '@/lib/utils'
+import { getWorkingCoverImage } from '@/lib/image-utils'
 import type { Project } from '@/types'
 import type { Metadata } from 'next'
 
@@ -81,7 +82,7 @@ export async function generateMetadata({
       type: 'article',
       title: project.title,
       description: project.description.substring(0, 160).replace(/[#*`>\[\]]/g, ''),
-      images: [{ url: project.cover_image, width: 1200, height: 630 }],
+      images: [{ url: getWorkingCoverImage(project.cover_image, project.title), width: 1200, height: 630 }],
       url: `${siteUrl}/projects/${slug}`,
       publishedTime: project.published_at || project.created_at,
       authors: [project.author?.username || '匿名'],
@@ -91,7 +92,7 @@ export async function generateMetadata({
       card: 'summary_large_image',
       title: project.title,
       description: project.description.substring(0, 160).replace(/[#*`>\[\]]/g, ''),
-      images: [project.cover_image],
+      images: [getWorkingCoverImage(project.cover_image, project.title)],
     },
     alternates: {
       canonical: `${siteUrl}/projects/${slug}`,
@@ -123,7 +124,7 @@ export default async function ProjectPage({
     },
     datePublished: project.published_at || project.created_at,
     keywords: project.tags.join(', '),
-    image: project.cover_image || `https://image.pollinations.ai/prompt/${encodeURIComponent(project.title)}?width=1200&height=630&nologo=true`,
+    image: getWorkingCoverImage(project.cover_image, project.title),
     url: project.project_url || siteUrl + `/projects/${slug}`,
   }
 
@@ -147,7 +148,7 @@ export default async function ProjectPage({
         {/* Cover */}
         <div className="relative w-full aspect-video rounded-card overflow-hidden mb-8 bg-surface-secondary">
           <Image
-            src={project.cover_image || `https://image.pollinations.ai/prompt/${encodeURIComponent(project.title)}?width=1200&height=630&nologo=true`}
+            src={getWorkingCoverImage(project.cover_image, project.title)}
             alt={project.title}
             fill
             className="object-cover"

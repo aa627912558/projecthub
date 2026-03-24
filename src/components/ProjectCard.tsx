@@ -2,6 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { TagBadge } from './TagBadge'
 import { formatDate } from '@/lib/utils'
+import { getWorkingCoverImage } from '@/lib/image-utils'
 import type { Project } from '@/types'
 
 interface ProjectCardProps {
@@ -9,6 +10,8 @@ interface ProjectCardProps {
 }
 
 export function ProjectCard({ project }: ProjectCardProps) {
+  const coverUrl = getWorkingCoverImage(project.cover_image, project.title)
+
   return (
     <Link
       href={`/projects/${project.slug}`}
@@ -17,7 +20,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
       {/* Cover Image */}
       <div className="relative aspect-video overflow-hidden bg-surface-secondary">
         <Image
-          src={project.cover_image || `https://image.pollinations.ai/prompt/${encodeURIComponent(project.title)}?width=800&height=450&nologo=true`}
+          src={coverUrl}
           alt={project.title}
           fill
           className="object-cover transition-transform duration-300 group-hover:scale-105"

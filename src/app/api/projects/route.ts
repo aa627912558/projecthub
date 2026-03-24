@@ -4,6 +4,17 @@ import { projectSchema } from '@/lib/schemas'
 import { generateSlug } from '@/lib/utils'
 import { moderateProject, type FlaggedItem } from '@/lib/moderation'
 
+// Generate a deterministic seed from a string
+function stringToSeed(str: string): number {
+  let hash = 0
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i)
+    hash = ((hash << 5) - hash) + char
+    hash = hash & hash
+  }
+  return Math.abs(hash)
+}
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
@@ -92,9 +103,9 @@ export async function POST(req: NextRequest) {
       reason: moderationResultOverride.reason,
     })
 
-    // 自动生成封面图（基于标题）
-    const encodedTitle = encodeURIComponent(result.data.title)
-    const coverImage = result.data.cover_image || `https://image.pollinations.ai/prompt/${encodedTitle}?width=1200&height=630&seed=${Date.now()}&nologo=true`
+    // 自动生成封面图（基于标题）- 使用稳定的 picsum.photos
+    // Pollinations AI 暂时不可用，改用 picsum.photos
+    const coverImage = result.data.cover_image || `https://picsum.photos/seed/${stringToSeed(result.data.title)}/1200/630`
 
     const slug = generateSlug(result.data.title)
     const adminClient = await createAdminClient()
