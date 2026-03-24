@@ -13,6 +13,7 @@ export interface Project {
   title: string
   description: string
   content?: string
+  category?: string
   cover_image: string
   project_url: string
   gallery: string[]
@@ -37,6 +38,7 @@ export interface FlaggedItem {
 export interface ProjectFormData {
   title: string
   description: string
+  category?: string
   cover_image: string
   project_url: string
   gallery: string[]

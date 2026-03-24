@@ -13,6 +13,8 @@ const AVAILABLE_TAGS = [
   '长期', '短期', '个人', '团队',
 ]
 
+const CATEGORIES = ['实体项目', '网创项目', '副业', 'AI项目']
+
 export default function SubmitPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -21,6 +23,7 @@ export default function SubmitPage() {
   const [form, setForm] = useState({
     title: '',
     description: '',
+    category: '',
     tags: [] as string[],
   })
 
@@ -94,6 +97,30 @@ export default function SubmitPage() {
           error={errors.description}
           rows={12}
         />
+
+        {/* Category */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            项目分类 *
+          </label>
+          {errors.category && <p className="text-xs text-red-500 mb-2">{errors.category}</p>}
+          <div className="flex flex-wrap gap-2">
+            {CATEGORIES.map((cat) => (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => setForm({ ...form, category: form.category === cat ? '' : cat })}
+                className={`px-4 py-2 rounded-btn text-sm border transition-colors ${
+                  form.category === cat
+                    ? 'bg-accent text-white border-accent'
+                    : 'bg-white text-gray-600 border-border hover:border-accent hover:text-accent'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        </div>
 
         {/* Tags */}
         <div>

@@ -75,6 +75,7 @@ export async function POST(req: NextRequest) {
       description: result.data.description,
       project_url: result.data.project_url || '',
       cover_image: result.data.cover_image || '',
+      category: result.data.category,
     })
 
     console.log('[Content Moderation]', {
@@ -104,6 +105,7 @@ export async function POST(req: NextRequest) {
         slug,
         title: moderationResult.sanitizedContent.title,
         description: moderationResult.sanitizedContent.description,
+        category: result.data.category,
         cover_image: coverImage,
         project_url: result.data.project_url || '',
         tags: result.data.tags || [],

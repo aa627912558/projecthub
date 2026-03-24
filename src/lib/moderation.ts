@@ -22,6 +22,7 @@ export interface SanitizedContent {
   description: string
   project_url: string
   cover_image: string
+  category: string
 }
 
 // 违规检测正则
@@ -190,6 +191,7 @@ export function moderateProject(content: {
   description: string
   project_url: string
   cover_image?: string
+  category?: string
 }): ModerationResult {
   const allFlagged: FlaggedItem[] = []
 
@@ -216,6 +218,7 @@ export function moderateProject(content: {
     description: sanitizeText(content.description, uniqueFlagged, 'description'),
     project_url: sanitizeText(content.project_url, uniqueFlagged, 'project_url'),
     cover_image: content.cover_image || '',
+    category: content.category || '',
   }
 
   // 生成原因描述

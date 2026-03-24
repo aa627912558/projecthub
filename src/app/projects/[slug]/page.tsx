@@ -15,6 +15,7 @@ const DEMO_PROJECT: Project = {
   slug: 'ai-photo-enhancer',
   title: 'AI Photo Enhancer',
   description: '基于 Stable Diffusion 的老照片修复与增强工具，一键提升图片质量。支持黑白照片上色、模糊图片变清晰。\n\n## 功能特点\n\n- AI 智能修复老照片\n- 黑白照片一键上色\n- 图片分辨率提升 4 倍\n- 支持批量处理\n- 完全隐私保护，本地处理',
+  category: 'AI项目',
   cover_image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1200&q=80',
   project_url: 'https://example.com/ai-photo',
   gallery: [
