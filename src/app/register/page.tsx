@@ -70,13 +70,18 @@ export default function RegisterPage() {
           required
         />
 
-        <Input
-          label="用户名"
-          placeholder="your_username"
-          value={form.username}
-          onChange={(e) => setForm({ ...form, username: e.target.value })}
-          required
-        />
+        <div>
+          <Input
+            label="笔名（作者名称）"
+            placeholder="如：科技小达人"
+            value={form.username}
+            onChange={(e) => setForm({ ...form, username: e.target.value })}
+            required
+          />
+          <p className="mt-1 text-xs text-gray-400">
+            2-12个字符，只能用中文、英文、数字，数字不能超过一半
+          </p>
+        </div>
 
         <Input
           label="密码（至少6位）"

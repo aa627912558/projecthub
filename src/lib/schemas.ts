@@ -1,14 +1,25 @@
-import { z } from 'zod'
+// Custom refine for username: numbers cannot exceed half the total length
+const usernameValidation = z.string()
+  .min(2, '用户名至少2个字符')
+  .max(12, '用户名最多12个字符')
+  .regex(/^[\u4e00-\u9fa5a-zA-Z0-9]+$/, '用户名只能包含中文、英文、数字')
 
 export const registerSchema = z.object({
   email: z.string().email('请输入有效的邮箱地址'),
   password: z.string().min(6, '密码至少6位'),
-  username: z
-    .string()
-    .min(3, '用户名至少3位')
-    .max(20, '用户名最多20位')
-    .regex(/^[a-zA-Z0-9_-]+$/, '用户名只能包含字母、数字、下划线和短横线'),
+  username: usernameValidation,
 })
+  .refine(
+    (data) => {
+      // Numbers cannot exceed half the total length (防纯数字账号)
+      const numCount = (data.username.match(/[0-9]/g) || []).length
+      return numCount <= Math.floor(data.username.length / 2)
+    },
+    {
+      message: '数字不能超过用户名总长度的一半',
+      path: ['username'],
+    }
+  )
 
 export const loginSchema = z.object({
   email: z.string().email('请输入有效的邮箱地址'),
