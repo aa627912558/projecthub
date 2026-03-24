@@ -2,17 +2,21 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus } from 'lucide-react'
 import { Button } from '@/components/Button'
 import { Input, Textarea } from '@/components/Input'
 import { TagBadge } from '@/components/TagBadge'
 import { projectSchema } from '@/lib/schemas'
 
+const AVAILABLE_TAGS = [
+  '实体', '网创', '副业', '轻资产', '低成本',
+  '线上', '线下', '蓝海', '热门', '冷门',
+  '长期', '短期', '个人', '团队',
+]
+
 export default function SubmitPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [tagInput, setTagInput] = useState('')
 
   const [form, setForm] = useState({
     title: '',
@@ -21,26 +25,6 @@ export default function SubmitPage() {
   })
 
   const [errors, setErrors] = useState<Record<string, string>>({})
-
-  const handleAddTag = () => {
-    const tag = tagInput.trim()
-    if (!tag) return
-    if (form.tags.includes(tag)) {
-      setError('标签已存在')
-      return
-    }
-    if (form.tags.length >= 5) {
-      setError('最多添加5个标签')
-      return
-    }
-    setForm({ ...form, tags: [...form.tags, tag] })
-    setTagInput('')
-    setError('')
-  }
-
-  const handleRemoveTag = (tag: string) => {
-    setForm({ ...form, tags: form.tags.filter((t) => t !== tag) })
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -114,36 +98,41 @@ export default function SubmitPage() {
         {/* Tags */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1.5">
-            标签（最多5个）
+            项目标签（最多6个）
           </label>
-          <div className="flex gap-2 mb-2">
-            <input
-              type="text"
-              value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault()
-                  handleAddTag()
-                }
-              }}
-              placeholder="输入标签后按回车添加"
-              className="flex-1 px-3 py-2 border border-border rounded-btn text-sm focus:outline-none focus:ring-2 focus:ring-accent/50"
-              maxLength={20}
-            />
-            <Button type="button" variant="secondary" onClick={handleAddTag}>
-              <Plus className="w-4 h-4" />
-              添加
-            </Button>
-          </div>
           {errors.tags && <p className="text-xs text-red-500 mb-2">{errors.tags}</p>}
+          <div className="flex flex-wrap gap-2">
+            {AVAILABLE_TAGS.map((tag) => {
+              const selected = form.tags.includes(tag)
+              return (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => {
+                    if (selected) {
+                      setForm({ ...form, tags: form.tags.filter((t) => t !== tag) })
+                    } else if (form.tags.length < 6) {
+                      setForm({ ...form, tags: [...form.tags, tag] })
+                    }
+                  }}
+                  className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
+                    selected
+                      ? 'bg-accent text-white border-accent'
+                      : 'bg-white text-gray-600 border-border hover:border-accent hover:text-accent'
+                  } ${!selected && form.tags.length >= 6 ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
+                >
+                  {tag}
+                </button>
+              )
+            })}
+          </div>
           {form.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 mt-3">
               {form.tags.map((tag) => (
                 <TagBadge
                   key={tag}
                   tag={tag}
-                  onClick={() => handleRemoveTag(tag)}
+                  onClick={() => setForm({ ...form, tags: form.tags.filter((t) => t !== tag) })}
                   className="cursor-pointer"
                 />
               ))}

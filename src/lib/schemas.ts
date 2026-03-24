@@ -28,7 +28,7 @@ export const projectSchema = z.object({
   project_url: z.string().url('请输入有效的项目链接').optional().or(z.literal('').transform(() => undefined)),
   tags: z
     .array(z.string().max(20))
-    .max(5, '最多5个标签')
+    .max(6, '最多6个标签')
     .optional()
     .default([]),
   gallery: z
