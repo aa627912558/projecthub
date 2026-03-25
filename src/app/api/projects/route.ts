@@ -15,6 +15,67 @@ function stringToSeed(str: string): number {
   return Math.abs(hash)
 }
 
+/**
+ * Generate a cover image using MiniMax AI based on the project title.
+ * Falls back to deterministic picsum if MiniMax fails or is unavailable.
+ */
+async function generateCoverImageWithMinimax(title: string): Promise<string> {
+  const apiKey = process.env.MINIMAX_API_Key || process.env.MINIMAX_API_KEY
+  if (!apiKey) {
+    console.warn('[CoverImage] MINIMAX_API_KEY not set, using fallback')
+    return `https://picsum.photos/seed/${stringToSeed(title)}/1200/630`
+  }
+
+  // Build prompt: use the title as-is for MiniMax to generate a relevant cover
+  const prompt = `项目封面图，主题：${title}，现代简约风格，高质量，没有文字`
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 25000)
+
+  try {
+    const response = await fetch('https://api.minimaxi.com/v1/image_generation', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'image-01',
+        prompt,
+        aspect_ratio: '16:9',
+        n: 1,
+        response_format: 'url',
+      }),
+      signal: controller.signal,
+    })
+
+    clearTimeout(timeout)
+
+    if (!response.ok) {
+      const errText = await response.text()
+      console.error('[CoverImage] MiniMax API error:', response.status, errText)
+      return `https://picsum.photos/seed/${stringToSeed(title)}/1200/630`
+    }
+
+    const data = await response.json()
+    const imageUrl = data?.data?.image_urls?.[0]
+    if (imageUrl) {
+      console.log('[CoverImage] Generated with MiniMax:', imageUrl)
+      return imageUrl
+    } else {
+      console.warn('[CoverImage] No image_url in response, using fallback')
+      return `https://picsum.photos/seed/${stringToSeed(title)}/1200/630`
+    }
+  } catch (err: unknown) {
+    clearTimeout(timeout)
+    if (err instanceof Error && err.name === 'AbortError') {
+      console.warn('[CoverImage] MiniMax request timed out, using fallback')
+    } else {
+      console.error('[CoverImage] MiniMax fetch error:', err)
+    }
+    return `https://picsum.photos/seed/${stringToSeed(title)}/1200/630`
+  }
+}
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
@@ -103,9 +164,28 @@ export async function POST(req: NextRequest) {
       reason: moderationResultOverride.reason,
     })
 
-    // 自动生成封面图（基于标题）- 使用稳定的 picsum.photos
-    // Pollinations AI 暂时不可用，改用 picsum.photos
-    const coverImage = result.data.cover_image || `https://picsum.photos/seed/${stringToSeed(result.data.title)}/1200/630`
+    // 自动生成封面图（基于标题）- 使用 MiniMax AI 生成
+    // 如果用户提供了封面图则使用用户提供的，否则调用 MiniMax 生成
+    let coverImage: string
+    if (result.data.cover_image) {
+      coverImage = result.data.cover_image
+    } else {
+      // 调用 MiniMax 生成封面图（异步，不阻塞发布流程）
+      // 注意：封面图生成失败时会 fallback 到 picsum，不影响项目发布
+      generateCoverImageWithMinimax(result.data.title)
+        .then((url) => {
+          // 异步更新已发布项目的封面图
+          console.log('[CoverImage] Async cover update for slug:', slug, '->', url)
+          createAdminClient().then((admin) => {
+            admin.from('projects').update({ cover_image: url }).eq('slug', slug).then(({ error }) => {
+              if (error) console.error('[CoverImage] Failed to update cover:', error)
+            })
+          })
+        })
+        .catch((err) => console.error('[CoverImage] Unexpected error:', err))
+      // 立即返回一个占位图让项目发布不受影响
+      coverImage = `https://picsum.photos/seed/${stringToSeed(result.data.title)}/1200/630`
+    }
 
     const slug = generateSlug(result.data.title)
     const adminClient = await createAdminClient()

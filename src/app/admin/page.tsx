@@ -8,6 +8,7 @@ import { Modal } from '@/components/Modal'
 import type { Project, FlaggedItem } from '@/types'
 import { formatDate } from '@/lib/utils'
 import { getFlagTypeName } from '@/lib/moderation'
+import { getWorkingCoverImage } from '@/lib/image-utils'
 
 export default function AdminPage() {
   const router = useRouter()
@@ -185,7 +186,7 @@ export default function AdminPage() {
                 <div className="flex items-start gap-4">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={project.cover_image}
+                    src={getWorkingCoverImage(project.cover_image, project.title)}
                     alt={project.title}
                     className="w-24 h-16 object-cover rounded-btn flex-shrink-0"
                   />
@@ -265,7 +266,7 @@ export default function AdminPage() {
                 <div className="flex items-start gap-4">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={project.cover_image}
+                    src={getWorkingCoverImage(project.cover_image, project.title)}
                     alt={project.title}
                     className="w-24 h-16 object-cover rounded-btn flex-shrink-0"
                   />
@@ -337,7 +338,7 @@ export default function AdminPage() {
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={project.cover_image}
+                src={getWorkingCoverImage(project.cover_image, project.title)}
                 alt={project.title}
                 className="w-16 h-12 object-cover rounded-btn flex-shrink-0"
               />
@@ -381,7 +382,7 @@ export default function AdminPage() {
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={project.cover_image}
+                  src={getWorkingCoverImage(project.cover_image, project.title)}
                   alt={project.title}
                   className="w-16 h-12 object-cover rounded-btn flex-shrink-0"
                 />
