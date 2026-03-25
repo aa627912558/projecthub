@@ -2,9 +2,10 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { Menu, X, Github, User } from 'lucide-react'
+import { Menu, X, User, LogOut } from 'lucide-react'
 import type { Profile } from '@/types'
-import { cn } from '@/lib/utils'
+import { createClient } from '@/lib/supabase'
+import { useRouter } from 'next/navigation'
 
 
 interface HeaderProps {
@@ -13,6 +14,22 @@ interface HeaderProps {
 
 export function Header({ user }: HeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [loggingOut, setLoggingOut] = useState(false)
+  const router = useRouter()
+
+  const handleLogout = async () => {
+    if (loggingOut) return
+    setLoggingOut(true)
+    try {
+      const supabase = createClient()
+      await supabase.auth.signOut()
+      router.push('/')
+      router.refresh()
+    } catch (error) {
+      console.error('Logout error:', error)
+      setLoggingOut(false)
+    }
+  }
 
   return (
     <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-border">
@@ -74,6 +91,14 @@ export function Header({ user }: HeaderProps) {
                     管理后台
                   </Link>
                 )}
+                <button
+                  onClick={handleLogout}
+                  disabled={loggingOut}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-500 hover:text-red-500 transition-colors disabled:opacity-50"
+                >
+                  <LogOut className="w-4 h-4" />
+                  {loggingOut ? '退出中...' : '退出登录'}
+                </button>
               </div>
             ) : (
               <>
@@ -167,6 +192,14 @@ export function Header({ user }: HeaderProps) {
                 管理后台
               </Link>
             )}
+            <button
+              onClick={() => { handleLogout(); setMobileOpen(false) }}
+              disabled={loggingOut}
+              className="flex items-center gap-2 text-red-500 disabled:opacity-50"
+            >
+              <LogOut className="w-4 h-4" />
+              {loggingOut ? '退出中...' : '退出登录'}
+            </button>
             <div className="pt-3 border-t border-border">
               {user ? (
                 <Link
