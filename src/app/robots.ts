@@ -1,6 +1,8 @@
 import { MetadataRoute } from 'next'
 
 export default function robots(): MetadataRoute.Robots {
+  const CANONICAL_DOMAIN = 'https://jingxuanai.com'
+
   return {
     rules: [
       {
@@ -21,7 +23,6 @@ export default function robots(): MetadataRoute.Robots {
         allow: '/',
       },
     ],
-    // Always point sitemap to the canonical domain for SEO
-    sitemap: 'https://jingxuanai.com/sitemap.xml',
+    sitemap: `${CANONICAL_DOMAIN}/sitemap.xml`,
   }
 }

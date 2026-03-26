@@ -2,9 +2,11 @@ import { MetadataRoute } from 'next'
 import { createAdminClient } from '@/lib/supabase-server'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
-    ? process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, '')
-    : 'https://jingxuanai.com'
+  // Canonical domain — always use jingxuanai.com for sitemap URLs
+  // to avoid Vercel preview URLs (e.g. jingxuanai-com.vercel.app) being indexed
+  const CANONICAL_DOMAIN = 'https://jingxuanai.com'
+
+  const siteUrl = CANONICAL_DOMAIN
 
   const staticPages: MetadataRoute.Sitemap = [
     {
