@@ -106,7 +106,8 @@ export async function GET(req: NextRequest) {
     }
 
     if (category) {
-      query = query.eq('category', category)
+      // Also match by tag as fallback — some articles store category as a tag
+      query = query.or(`category.eq.${category},tags.cs.{${category}}`)
     }
 
     const { data, error, count } = await query

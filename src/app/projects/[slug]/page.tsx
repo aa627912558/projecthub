@@ -137,12 +137,23 @@ export default async function ProjectPage({
 
       <article className="max-w-content mx-auto px-4 sm:px-6 py-8">
         {/* Breadcrumb */}
-        <nav className="mb-6 text-sm">
+        <nav className="mb-6 text-sm flex items-center flex-wrap gap-1">
           <Link href="/" className="text-accent hover:text-accent-hover">
             首页
           </Link>
+          {project.category && (
+            <>
+              <span className="mx-2 text-gray-400">/</span>
+              <Link
+                href={`/?category=${encodeURIComponent(project.category)}`}
+                className="text-accent hover:text-accent-hover"
+              >
+                {project.category}
+              </Link>
+            </>
+          )}
           <span className="mx-2 text-gray-400">/</span>
-          <span className="text-gray-500">{project.title}</span>
+          <span className="text-gray-500 line-clamp-1">{project.title}</span>
         </nav>
 
         {/* Cover */}

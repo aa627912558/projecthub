@@ -129,7 +129,11 @@ async function getProjects(searchParams: SearchParams) {
       filtered = filtered.filter(p => p.tags.includes(searchParams.tag!))
     }
     if (searchParams.category) {
-      filtered = filtered.filter(p => p.category === searchParams.category)
+      const cat = searchParams.category
+      filtered = filtered.filter(p =>
+        p.category === cat ||
+        (p.tags && p.tags.includes(cat))
+      )
     }
     return { projects: filtered, total: filtered.length, page: 1, pageSize: 12, isDemo: true }
   }
@@ -155,7 +159,8 @@ async function getProjects(searchParams: SearchParams) {
   }
 
   if (searchParams.category) {
-    query = query.eq('category', searchParams.category)
+    // Also match by tag as fallback — some articles store category as a tag
+    query = query.or(`category.eq.${searchParams.category},tags.cs.{${searchParams.category}}`)
   }
 
   const { data, count } = await query

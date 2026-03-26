@@ -87,10 +87,10 @@ export function HomePageClient({
               全部项目
             </button>
             {[
-              { value: '实体项目', label: '实体类' },
-              { value: '网创项目', label: '网创类' },
-              { value: '副业', label: '副业类' },
-              { value: 'AI项目', label: 'AI类' },
+              { value: '副业', label: '副业' },
+              { value: 'AI项目', label: 'AI项目' },
+              { value: '实体项目', label: '实体项目' },
+              { value: '网创项目', label: '网创项目' },
             ].map(({ value, label }) => (
               <button
                 key={value}
