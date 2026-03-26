@@ -134,15 +134,19 @@ export async function PATCH(
     const body = await req.json()
     const adminClient = await createAdminClient()
 
-    // Build update object - only allow description field for safety
+    // Build update object - allow title, description, tags, cover_image, category
     const updateData: Record<string, unknown> = {}
+    if (body.title !== undefined) updateData.title = body.title
     if (body.description !== undefined) updateData.description = body.description
+    if (body.tags !== undefined) updateData.tags = body.tags
+    if (body.cover_image !== undefined) updateData.cover_image = body.cover_image
+    if (body.category !== undefined) updateData.category = body.category
 
     const { data, error } = await adminClient
       .from('projects')
       .update(updateData)
       .eq('slug', slug)
-      .select('slug, description')
+      .select('slug, title, description, tags, cover_image')
       .single()
 
     if (error) {

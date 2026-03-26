@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { Check, X, Trash2, AlertCircle, Eye, RefreshCw, LogOut } from 'lucide-react'
+import { Check, X, Trash2, AlertCircle, Eye, RefreshCw, LogOut, Edit } from 'lucide-react'
 import { Button } from '@/components/Button'
 import { Modal } from '@/components/Modal'
 import type { Project, FlaggedItem } from '@/types'
@@ -20,6 +20,8 @@ export default function AdminPage() {
   const [error, setError] = useState('')
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [showFlaggedModal, setShowFlaggedModal] = useState(false)
+  const [editingProject, setEditingProject] = useState<Project | null>(null)
+  const [showEditModal, setShowEditModal] = useState(false)
 
   const fetchData = useCallback(async () => {
     try {
@@ -119,6 +121,33 @@ export default function AdminPage() {
   const handleViewFlagged = (project: Project) => {
     setSelectedProject(project)
     setShowFlaggedModal(true)
+  }
+
+  const handleEditClick = (project: Project) => {
+    setEditingProject(project)
+    setShowEditModal(true)
+  }
+
+  const handleEditSave = async (updated: { title?: string; description?: string; tags?: string[]; cover_image?: string }) => {
+    if (!editingProject) return
+    setActionLoading(editingProject.id)
+    try {
+      const res = await fetch(`/api/projects/${editingProject.slug}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        alert(data.error || '保存失败')
+        return
+      }
+      setShowEditModal(false)
+      setEditingProject(null)
+      await fetchData()
+    } finally {
+      setActionLoading(null)
+    }
   }
 
   if (loading) {
@@ -357,6 +386,14 @@ export default function AdminPage() {
               </div>
               <Button
                 size="sm"
+                variant="secondary"
+                onClick={() => handleEditClick(project)}
+              >
+                <Edit className="w-4 h-4" />
+                编辑
+              </Button>
+              <Button
+                size="sm"
                 variant="danger"
                 onClick={() => handleDelete(project.id)}
                 loading={actionLoading === project.id}
@@ -427,6 +464,16 @@ export default function AdminPage() {
             setShowFlaggedModal(false)
             setSelectedProject(null)
           }}
+        />
+      )}
+
+      {/* Edit Project Modal */}
+      {showEditModal && editingProject && (
+        <ProjectEditModal
+          project={editingProject}
+          onClose={() => { setShowEditModal(false); setEditingProject(null) }}
+          onSave={handleEditSave}
+          saving={actionLoading === editingProject.id}
         />
       )}
     </div>
@@ -556,3 +603,164 @@ function FlaggedContentModal({
     </div>
   )
 }
+
+// 文章编辑弹窗
+function ProjectEditModal({
+  project,
+  onClose,
+  onSave,
+  saving,
+}: {
+  project: Project
+  onClose: () => void
+  onSave: (data: { title?: string; description?: string; tags?: string[]; cover_image?: string }) => void
+  saving: boolean
+}) {
+  const [title, setTitle] = useState(project.title)
+  const [description, setDescription] = useState(project.description)
+  const [tagsInput, setTagsInput] = useState(project.tags.join(', '))
+  const [coverImage, setCoverImage] = useState(project.cover_image)
+
+  // 常用分类选项（多选）
+  const categoryOptions = ['网创项目', 'AI项目', '副业', '工具推荐', '资源分享', '技术教程', '变现方法', '小红书运营']
+
+  // 从 tagsInput 解析出标签数组
+  const parseTags = (input: string) => {
+    return input.split(/[,，、\s]+/).map(t => t.trim()).filter(Boolean)
+  }
+
+  const tags = parseTags(tagsInput)
+
+  const handleSave = () => {
+    onSave({ title, description, tags, cover_image: coverImage })
+  }
+
+  const toggleCategory = (cat: string) => {
+    const current = parseTags(tagsInput)
+    if (current.includes(cat)) {
+      setTagsInput(current.filter(t => t !== cat).join(', '))
+    } else {
+      setTagsInput([...current, cat].join(', '))
+    }
+  }
+
+  const isCategorySelected = (cat: string) => {
+    return parseTags(tagsInput).includes(cat)
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-card max-w-2xl w-full max-h-[90vh] overflow-auto">
+        <div className="sticky top-0 bg-white border-b border-border px-6 py-4 flex items-center justify-between">
+          <h2 className="text-xl font-bold text-gray-900">编辑项目</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        <div className="p-6 space-y-5">
+          {/* 标题 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">标题</label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full border border-border rounded-btn px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-accent"
+              maxLength={100}
+            />
+          </div>
+
+          {/* 封面图 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">封面图 URL</label>
+            <input
+              type="text"
+              value={coverImage}
+              onChange={(e) => setCoverImage(e.target.value)}
+              className="w-full border border-border rounded-btn px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-accent"
+            />
+            {coverImage && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={coverImage} alt="封面预览" className="mt-2 w-full max-h-40 object-cover rounded-btn" />
+            )}
+          </div>
+
+          {/* 分类（多选） */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              分类（可多选）
+            </label>
+            <div className="flex flex-wrap gap-2 mb-2">
+              {categoryOptions.map((cat) => (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => toggleCategory(cat)}
+                  className={`px-3 py-1 text-sm rounded-full border transition-colors ${
+                    isCategorySelected(cat)
+                      ? 'bg-accent text-white border-accent'
+                      : 'bg-white text-gray-600 border-border hover:border-accent'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-gray-500">或直接在下方输入自定义标签，用逗号分隔</p>
+          </div>
+
+          {/* 标签输入 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">标签（逗号分隔）</label>
+            <input
+              type="text"
+              value={tagsInput}
+              onChange={(e) => setTagsInput(e.target.value)}
+              placeholder="网创项目, AI项目, 副业"
+              className="w-full border border-border rounded-btn px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-accent"
+            />
+            <div className="flex flex-wrap gap-1.5 mt-2">
+              {tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="px-2 py-0.5 bg-accent-light text-accent text-xs rounded-full"
+                >
+                  {tag}
+                </span>
+              ))}
+              {tags.length === 0 && (
+                <span className="text-xs text-gray-400">暂无标签</span>
+              )}
+            </div>
+          </div>
+
+          {/* 详细介绍 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">详细介绍</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={10}
+              className="w-full border border-border rounded-btn px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-accent resize-vertical"
+              maxLength={10000}
+            />
+            <p className="text-xs text-gray-400 mt-1 text-right">{description.length}/10000</p>
+          </div>
+        </div>
+
+        <div className="sticky bottom-0 bg-white border-t border-border px-6 py-4 flex justify-end gap-3">
+          <Button variant="secondary" onClick={onClose}>
+            取消
+          </Button>
+          <Button onClick={handleSave} loading={saving}>
+            <Check className="w-4 h-4" />
+            保存修改
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+
