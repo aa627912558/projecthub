@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Check, X, Trash2, AlertCircle, Eye, RefreshCw, LogOut, Edit } from 'lucide-react'
 import { Button } from '@/components/Button'
@@ -604,6 +604,157 @@ function FlaggedContentModal({
   )
 }
 
+// 14个固定Tags选项
+const TAG_OPTIONS = ['实体', '网创', '副业', '轻资产', '低成本', '线上', '线下', '蓝海', '热门', '冷门', '长期', '短期', '个人', '团队']
+
+// Tags选择组件（带下拉选项的chips输入）
+function TagSelectInput({
+  value,
+  onChange,
+}: {
+  value: string[]
+  onChange: (tags: string[]) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const [inputValue, setInputValue] = useState('')
+  const inputRef = useRef<HTMLInputElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  const filteredOptions = TAG_OPTIONS.filter(
+    tag =>
+      !value.includes(tag) &&
+      tag.toLowerCase().includes(inputValue.toLowerCase())
+  )
+
+  const canAddMore = value.length < 6
+
+  const addTag = (tag: string) => {
+    const trimmed = tag.trim()
+    if (!trimmed) return
+    if (value.includes(trimmed)) return
+    if (value.length >= 6) return
+    onChange([...value, trimmed])
+    setInputValue('')
+  }
+
+  const removeTag = (tag: string) => {
+    onChange(value.filter(t => t !== tag))
+  }
+
+  // 点击外部关闭下拉
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  return (
+    <div ref={containerRef} className="relative">
+      {/* 已选标签 + 输入框 */}
+      <div
+        className="flex flex-wrap gap-1.5 items-center border border-border rounded-btn px-3 py-2 min-h-[42px] cursor-text"
+        onClick={() => {
+          setOpen(true)
+          inputRef.current?.focus()
+        }}
+      >
+        {value.map((tag) => (
+          <span
+            key={tag}
+            className="inline-flex items-center gap-1 px-2 py-0.5 bg-accent text-white text-xs rounded-full"
+          >
+            {tag}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                removeTag(tag)
+              }}
+              className="hover:text-red-200 leading-none"
+            >
+              ×
+            </button>
+          </span>
+        ))}
+        {canAddMore && (
+          <input
+            ref={inputRef}
+            type="text"
+            value={inputValue}
+            onChange={(e) => {
+              setInputValue(e.target.value)
+              setOpen(true)
+            }}
+            onFocus={() => setOpen(true)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ',') {
+                e.preventDefault()
+                addTag(inputValue)
+              }
+              if (e.key === 'Backspace' && inputValue === '' && value.length > 0) {
+                removeTag(value[value.length - 1])
+              }
+            }}
+            placeholder={value.length === 0 ? '点击选择或输入标签' : ''}
+            className="flex-1 min-w-[120px] text-sm text-gray-900 outline-none bg-transparent placeholder:text-gray-400"
+          />
+        )}
+        {!canAddMore && (
+          <span className="text-xs text-gray-400">最多6个</span>
+        )}
+      </div>
+
+      {/* 下拉选项列表 */}
+      {open && (
+        <div className="absolute z-50 mt-1 w-full bg-white border border-border rounded-btn shadow-lg max-h-60 overflow-auto">
+          {filteredOptions.length > 0 && (
+            <div className="py-1">
+              <p className="px-3 py-1 text-xs text-gray-400">推荐标签</p>
+              {filteredOptions.map((tag) => (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => {
+                    addTag(tag)
+                    setOpen(false)
+                    setInputValue('')
+                  }}
+                  className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-accent-light hover:text-accent transition-colors"
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+          )}
+          {inputValue.trim() && !TAG_OPTIONS.includes(inputValue.trim()) && (
+            <div className="border-t border-border py-1">
+              <p className="px-3 py-1 text-xs text-gray-400">自定义标签</p>
+              <button
+                type="button"
+                onClick={() => {
+                  addTag(inputValue)
+                  setOpen(false)
+                  setInputValue('')
+                }}
+                className="w-full text-left px-3 py-2 text-sm text-accent hover:bg-accent-light transition-colors"
+              >
+                + 添加「{inputValue.trim()}」
+              </button>
+            </div>
+          )}
+          {filteredOptions.length === 0 && !inputValue.trim() && (
+            <p className="px-3 py-4 text-sm text-gray-400 text-center">无可用标签（已选满6个）</p>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // 文章编辑弹窗
 function ProjectEditModal({
   project,
@@ -618,34 +769,11 @@ function ProjectEditModal({
 }) {
   const [title, setTitle] = useState(project.title)
   const [description, setDescription] = useState(project.description)
-  const [tagsInput, setTagsInput] = useState(project.tags.join(', '))
+  const [tags, setTags] = useState<string[]>(project.tags || [])
   const [coverImage, setCoverImage] = useState(project.cover_image)
-
-  // 常用分类选项（多选）— 固定4个分类
-  const categoryOptions = ['实体项目', '网创项目', '副业', 'AI项目']
-
-  // 从 tagsInput 解析出标签数组
-  const parseTags = (input: string) => {
-    return input.split(/[,，、\s]+/).map(t => t.trim()).filter(Boolean)
-  }
-
-  const tags = parseTags(tagsInput)
 
   const handleSave = () => {
     onSave({ title, description, tags, cover_image: coverImage })
-  }
-
-  const toggleCategory = (cat: string) => {
-    const current = parseTags(tagsInput)
-    if (current.includes(cat)) {
-      setTagsInput(current.filter(t => t !== cat).join(', '))
-    } else {
-      setTagsInput([...current, cat].join(', '))
-    }
-  }
-
-  const isCategorySelected = (cat: string) => {
-    return parseTags(tagsInput).includes(cat)
   }
 
   return (
@@ -686,53 +814,13 @@ function ProjectEditModal({
             )}
           </div>
 
-          {/* 分类（多选） */}
+          {/* 标签选择 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              分类（可多选）
+              项目标签（最多选6个）
             </label>
-            <div className="flex flex-wrap gap-2 mb-2">
-              {categoryOptions.map((cat) => (
-                <button
-                  key={cat}
-                  type="button"
-                  onClick={() => toggleCategory(cat)}
-                  className={`px-3 py-1 text-sm rounded-full border transition-colors ${
-                    isCategorySelected(cat)
-                      ? 'bg-accent text-white border-accent'
-                      : 'bg-white text-gray-600 border-border hover:border-accent'
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-            <p className="text-xs text-gray-500">或直接在下方输入自定义标签，用逗号分隔</p>
-          </div>
-
-          {/* 标签输入 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">标签（逗号分隔）</label>
-            <input
-              type="text"
-              value={tagsInput}
-              onChange={(e) => setTagsInput(e.target.value)}
-              placeholder="网创项目, AI项目, 副业"
-              className="w-full border border-border rounded-btn px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-accent"
-            />
-            <div className="flex flex-wrap gap-1.5 mt-2">
-              {tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="px-2 py-0.5 bg-accent-light text-accent text-xs rounded-full"
-                >
-                  {tag}
-                </span>
-              ))}
-              {tags.length === 0 && (
-                <span className="text-xs text-gray-400">暂无标签</span>
-              )}
-            </div>
+            <TagSelectInput value={tags} onChange={setTags} />
+            <p className="text-xs text-gray-400 mt-1">点击选择推荐标签，也可直接输入自定义标签后回车</p>
           </div>
 
           {/* 详细介绍 */}
