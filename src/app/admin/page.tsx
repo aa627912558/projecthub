@@ -128,7 +128,7 @@ export default function AdminPage() {
     setShowEditModal(true)
   }
 
-  const handleEditSave = async (updated: { title?: string; description?: string; tags?: string[]; cover_image?: string }) => {
+  const handleEditSave = async (updated: { title?: string; description?: string; tags?: string[]; cover_image?: string; categories?: string[] }) => {
     if (!editingProject) return
     setActionLoading(editingProject.id)
     try {
@@ -756,6 +756,8 @@ function TagSelectInput({
 }
 
 // 文章编辑弹窗
+const CATEGORY_OPTIONS = ['实体项目', '网创项目', '副业', 'AI项目']
+
 function ProjectEditModal({
   project,
   onClose,
@@ -764,16 +766,23 @@ function ProjectEditModal({
 }: {
   project: Project
   onClose: () => void
-  onSave: (data: { title?: string; description?: string; tags?: string[]; cover_image?: string }) => void
+  onSave: (data: { title?: string; description?: string; tags?: string[]; cover_image?: string; categories?: string[] }) => void
   saving: boolean
 }) {
   const [title, setTitle] = useState(project.title)
   const [description, setDescription] = useState(project.description)
   const [tags, setTags] = useState<string[]>(project.tags || [])
   const [coverImage, setCoverImage] = useState(project.cover_image)
+  const [categories, setCategories] = useState<string[]>(project.categories || [])
+
+  const toggleCategory = (cat: string) => {
+    setCategories(prev =>
+      prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
+    )
+  }
 
   const handleSave = () => {
-    onSave({ title, description, tags, cover_image: coverImage })
+    onSave({ title, description, tags, cover_image: coverImage, categories })
   }
 
   return (
@@ -812,6 +821,29 @@ function ProjectEditModal({
               // eslint-disable-next-line @next/next/no-img-element
               <img src={coverImage} alt="封面预览" className="mt-2 w-full max-h-40 object-cover rounded-btn" />
             )}
+          </div>
+
+          {/* 分类选择 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              项目分类（可多选）
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {CATEGORY_OPTIONS.map((cat) => (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => toggleCategory(cat)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                    categories.includes(cat)
+                      ? 'bg-accent text-white'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* 标签选择 */}

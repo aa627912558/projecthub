@@ -14,6 +14,7 @@ export interface Project {
   description: string
   content?: string
   category?: string
+  categories?: string[]
   cover_image: string
   project_url: string
   gallery: string[]
