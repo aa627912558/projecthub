@@ -56,3 +56,19 @@ export interface PaginatedResponse<T> {
   page: number
   pageSize: number
 }
+
+// News Articles
+export interface NewsArticle {
+  id: string
+  slug: string
+  title: string
+  summary: string        // AI-generated summary (100-300 chars)
+  source_name: string   // e.g. "机器之心"
+  source_url: string    // RSS feed URL
+  original_url: string  // Original article URL
+  published_at: string  // Original publish date
+  cover_image?: string   // Optional cover image
+  tags: string[]
+  status: 'draft' | 'published'
+  created_at: string
+}

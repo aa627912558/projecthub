@@ -101,3 +101,60 @@ async function verifyAdminJWT(token: string): Promise<boolean> {
     return false
   }
 }
+
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ slug: string }> }
+) {
+  try {
+    const { slug } = await params
+
+    // Check admin session JWT cookie first
+    const adminToken = await getAdminCookie(ADMIN_SESSION_COOKIE)
+    const isAdminByJWT = adminToken
+      ? await verifyAdminJWT(adminToken)
+      : false
+
+    if (!isAdminByJWT) {
+      const supabase = await createServerSupabaseClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        return NextResponse.json({ error: '请先登录' }, { status: 401 })
+      }
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('is_admin')
+        .eq('id', user.id)
+        .single()
+      if (!profile?.is_admin) {
+        return NextResponse.json({ error: '无权限' }, { status: 403 })
+      }
+    }
+
+    const body = await req.json()
+    const adminClient = await createAdminClient()
+
+    // Build update object - only allow description field for safety
+    const updateData: Record<string, unknown> = {}
+    if (body.description !== undefined) updateData.description = body.description
+
+    const { data, error } = await adminClient
+      .from('projects')
+      .update(updateData)
+      .eq('slug', slug)
+      .select('slug, description')
+      .single()
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+    if (!data) {
+      return NextResponse.json({ error: '项目不存在' }, { status: 404 })
+    }
+
+    return NextResponse.json({ success: true, slug: data.slug })
+  } catch (err) {
+    console.error('Project PATCH error:', err)
+    return NextResponse.json({ error: '服务器错误' }, { status: 500 })
+  }
+}
