@@ -110,8 +110,6 @@ const DEMO_PROJECTS: Project[] = [
   },
 ]
 
-const DEMO_TAGS = ['AI', '开发工具', '图片处理', '效率工具', '开源', '无代码', '语音助手', 'Notion', '代码编辑器', 'JSON']
-
 async function getProjects(searchParams: SearchParams) {
   // Check if Supabase is configured
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -171,33 +169,6 @@ async function getProjects(searchParams: SearchParams) {
   }
 }
 
-async function getAllTags() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-  if (!supabaseUrl || !supabaseKey || supabaseUrl === 'your-supabase-url') {
-    return DEMO_TAGS
-  }
-
-  const supabase = await createServerSupabaseClient()
-  const { data } = await supabase
-    .from('projects')
-    .select('tags')
-    .eq('status', 'published')
-
-  const tagCounts: Record<string, number> = {}
-  data?.forEach((project) => {
-    project.tags?.forEach((tag: string) => {
-      tagCounts[tag] = (tagCounts[tag] || 0) + 1
-    })
-  })
-
-  return Object.entries(tagCounts)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 20)
-    .map(([tag]) => tag)
-}
-
 export const metadata: Metadata = {
   title: 'ProjectHub - 发现和分享有趣的项目',
   description: 'ProjectHub 是一个开放的项目分享平台，让每一个好项目都被看见。',
@@ -209,10 +180,7 @@ export default async function HomePage({
   searchParams: Promise<SearchParams>
 }) {
   const params = await searchParams
-  const [{ projects, total, page, pageSize, isDemo }, tags] = await Promise.all([
-    getProjects(params),
-    getAllTags(),
-  ])
+  const { projects, total, page, pageSize, isDemo } = await getProjects(params)
 
   return (
     <main>
@@ -223,7 +191,6 @@ export default async function HomePage({
       )}
       <HomePageClient
         initialProjects={projects}
-        initialTags={tags}
         initialSearchParams={params}
         total={total}
         page={page}

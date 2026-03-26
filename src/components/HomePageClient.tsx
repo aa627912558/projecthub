@@ -2,14 +2,13 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Search, Filter } from 'lucide-react'
+import { Search } from 'lucide-react'
 import { ProjectCard } from '@/components/ProjectCard'
-import { TagBadge } from '@/components/TagBadge'
+
 import type { Project } from '@/types'
 
 interface HomePageClientProps {
   initialProjects: Project[]
-  initialTags: string[]
   initialSearchParams: { q?: string; tag?: string; page?: string; category?: string }
   total: number
   page: number
@@ -18,7 +17,6 @@ interface HomePageClientProps {
 
 export function HomePageClient({
   initialProjects,
-  initialTags,
   initialSearchParams,
   total,
   page,
@@ -26,14 +24,6 @@ export function HomePageClient({
 }: HomePageClientProps) {
   const router = useRouter()
   const totalPages = Math.ceil(total / pageSize)
-
-  const handleTagClick = (tag: string | null) => {
-    const params = new URLSearchParams()
-    if (initialSearchParams.q) params.set('q', initialSearchParams.q)
-    if (initialSearchParams.category) params.set('category', initialSearchParams.category)
-    if (tag) params.set('tag', tag)
-    router.push(`/?${params.toString()}`)
-  }
 
   const handleCategoryClick = (category: string | null) => {
     const params = new URLSearchParams()
@@ -116,33 +106,7 @@ export function HomePageClient({
             ))}
           </div>
 
-          {/* Tags filter row */}
-          {initialTags.length > 0 && (
-            <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide pb-1.5">
-              <Filter className="w-3 h-3 text-gray-400 flex-shrink-0" />
-              <button
-                onClick={() => handleTagClick(null)}
-                className={`flex-shrink-0 px-2.5 py-0.5 rounded-full text-xs font-medium transition-colors ${
-                  !initialSearchParams.tag
-                    ? 'bg-accent text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                全部
-              </button>
-              {initialTags.map((tag) => (
-                <TagBadge
-                  key={tag}
-                  tag={tag}
-                  active={initialSearchParams.tag === tag}
-                  onClick={() =>
-                    handleTagClick(initialSearchParams.tag === tag ? null : tag)
-                  }
-                  className="flex-shrink-0 cursor-pointer"
-                />
-              ))}
-            </div>
-          )}
+
         </div>
       </section>
 
