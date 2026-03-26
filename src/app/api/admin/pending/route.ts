@@ -23,7 +23,7 @@ export async function GET() {
     const { data } = await supabase
       .from('projects')
       .select('*, author:profiles(*)')
-      .eq('status', 'pending')
+      .in('status', ['pending', 'pending_review'])
       .order('created_at', { ascending: true })
 
     return NextResponse.json(data || [])

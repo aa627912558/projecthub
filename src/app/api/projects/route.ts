@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient, createAdminClient } from '@/lib/supabase-server'
 import { projectSchema } from '@/lib/schemas'
 import { generateSlug } from '@/lib/utils'
-import { moderateProject, type FlaggedItem } from '@/lib/moderation'
+import { moderateProject } from '@/lib/moderation'
 
 // Generate a deterministic seed from a string
 function stringToSeed(str: string): number {
@@ -26,7 +26,6 @@ async function generateCoverImageWithMinimax(title: string): Promise<string> {
     return `https://picsum.photos/seed/${stringToSeed(title)}/1200/630`
   }
 
-  // Build prompt: use the title as-is for MiniMax to generate a relevant cover
   const prompt = `项目封面图，主题：${title}，现代简约风格，高质量，没有文字`
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), 25000)
@@ -106,7 +105,6 @@ export async function GET(req: NextRequest) {
     }
 
     if (category) {
-      // Also match by tag as fallback — some articles store category as a tag
       query = query.or(`category.eq.${category},tags.cs.{${category}}`)
     }
 
@@ -147,7 +145,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // AI内容审核 (暂时禁用，让所有内容直接发布)
+    // AI内容审核 - 检测敏感内容
     const moderationResult = moderateProject({
       title: result.data.title,
       description: result.data.description,
@@ -156,26 +154,19 @@ export async function POST(req: NextRequest) {
       category: result.data.category,
     })
 
-    // 暂时禁用审核，所有内容直接发布
-    const moderationResultOverride = { ...moderationResult, isClean: true }
-
     console.log('[Content Moderation]', {
-      isClean: moderationResultOverride.isClean,
-      flaggedCount: moderationResultOverride.flaggedContent.length,
-      reason: moderationResultOverride.reason,
+      isClean: moderationResult.isClean,
+      flaggedCount: moderationResult.flaggedContent.length,
+      reason: moderationResult.reason,
     })
 
-    // 自动生成封面图（基于标题）- 使用 MiniMax AI 生成
-    // 如果用户提供了封面图则使用用户提供的，否则调用 MiniMax 生成
+    // 自动生成封面图
     let coverImage: string
     if (result.data.cover_image) {
       coverImage = result.data.cover_image
     } else {
-      // 调用 MiniMax 生成封面图（异步，不阻塞发布流程）
-      // 注意：封面图生成失败时会 fallback 到 picsum，不影响项目发布
       generateCoverImageWithMinimax(result.data.title)
         .then((url) => {
-          // 异步更新已发布项目的封面图
           console.log('[CoverImage] Async cover update for slug:', slug, '->', url)
           createAdminClient().then((admin) => {
             admin.from('projects').update({ cover_image: url }).eq('slug', slug).then(({ error }) => {
@@ -184,40 +175,33 @@ export async function POST(req: NextRequest) {
           })
         })
         .catch((err) => console.error('[CoverImage] Unexpected error:', err))
-      // 立即返回一个占位图让项目发布不受影响
       coverImage = `https://picsum.photos/seed/${stringToSeed(result.data.title)}/1200/630`
     }
 
     const slug = generateSlug(result.data.title)
     const adminClient = await createAdminClient()
 
-    // 确定状态：如果有违规内容，标记为待审核；否则直接发布
-    const status = moderationResultOverride.isClean ? 'published' : 'pending_review'
-    
-    // 如果有违规内容，保存原始内容用于后台显示
-    const flaggedContent = moderationResultOverride.isClean 
-      ? null 
-      : JSON.stringify(moderationResultOverride.flaggedContent)
+    // 正常内容直接发布；有敏感词则进待审核，原始内容不过滤
+    const status = moderationResult.isClean ? 'published' : 'pending'
 
-    // Build insert object
+    // 始终保存用户提交的原始内容（不过滤）
     const insertData = {
       slug,
-      title: moderationResultOverride.sanitizedContent.title,
-      description: moderationResultOverride.sanitizedContent.description,
+      title: result.data.title,
+      description: result.data.description,
       cover_image: coverImage,
       project_url: result.data.project_url || '',
       tags: result.data.tags || [],
       gallery: result.data.gallery || [],
       author_id: user.id,
       status,
-      flagged_content: flaggedContent,
-      flagged_reason: moderationResultOverride.isClean ? null : moderationResultOverride.reason,
+      flagged_content: moderationResult.isClean ? null : JSON.stringify(moderationResult.flaggedContent),
+      flagged_reason: moderationResult.isClean ? null : moderationResult.reason,
       published_at: status === 'published' ? new Date().toISOString() : null,
     }
 
     let data, error
 
-    // Try with category first
     const insertWithCategory = { ...insertData, category: result.data.category || '副业' }
     const { data: d1, error: e1 } = await adminClient
       .from('projects')
@@ -226,7 +210,6 @@ export async function POST(req: NextRequest) {
       .single()
 
     if (e1) {
-      // If error is about missing column, retry without category
       if (e1.message.includes('category') || e1.code === '42703') {
         console.log('[Category column missing, retrying without category]')
         const { data: d2, error: e2 } = await adminClient
@@ -249,43 +232,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: error?.message || 'Unknown error' }, { status: 500 })
     }
 
-    // 如果有违规内容，发送管理员通知
-    if (!moderationResultOverride.isClean) {
-      try {
-        // 获取管理员邮箱列表
-        const { data: admins } = await adminClient
-          .from('profiles')
-          .select('email, username')
-          .eq('is_admin', true)
-
-        if (admins && admins.length > 0) {
-          // 发送邮件通知（如果有邮件服务配置）
-          const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.xiangmupai.com'
-          for (const admin of admins) {
-            console.log(`[Admin Notification] 通知管理员 ${admin.username}: 项目 "${result.data.title}" 需要审核`)
-          }
-          
-          // TODO: 实际发送邮件通知
-          // 可以使用 Resend、SendGrid 等服务
-          // await sendEmail({
-          //   to: admin.email,
-          //   subject: `【项目派】新项目待审核: ${result.data.title}`,
-          //   html: `...`
-          // })
-        }
-      } catch (notifyError) {
-        console.error('[Admin Notification Error]', notifyError)
-        // 不影响主流程
-      }
-    }
-
     return NextResponse.json({
       slug: data!.slug,
       status: data!.status,
-      message: moderationResultOverride.isClean 
-        ? '项目已发布' 
-        : '项目已提交，需要管理员审核',
-      flaggedCount: moderationResultOverride.flaggedContent.length,
+      message: moderationResult.isClean
+        ? '项目已发布'
+        : '提交成功，等待管理员审核后展示',
     })
   } catch (err) {
     console.error('Projects POST error:', err)

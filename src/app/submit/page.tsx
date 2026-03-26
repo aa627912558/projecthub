@@ -60,7 +60,8 @@ export default function SubmitPage() {
         return
       }
 
-      router.push(`/projects/${data.slug}`)
+      // 重定向到首页，显示提交成功提示
+      router.push('/?submitted=1')
     } catch {
       setError('网络错误，请重试')
     } finally {
@@ -172,7 +173,7 @@ export default function SubmitPage() {
             提交审核
           </Button>
           <p className="text-xs text-gray-400 text-center mt-3">
-            提交后项目需要管理员审核才能显示
+            提交成功，等待管理员审核后展示
           </p>
         </div>
       </form>

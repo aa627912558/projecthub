@@ -134,7 +134,7 @@ export async function PATCH(
     const body = await req.json()
     const adminClient = await createAdminClient()
 
-    // Build update object - allow title, description, tags, cover_image, category, categories
+    // Build update object - allow title, description, tags, cover_image, category, categories, status, published_at
     const updateData: Record<string, unknown> = {}
     if (body.title !== undefined) updateData.title = body.title
     if (body.description !== undefined) updateData.description = body.description
@@ -142,6 +142,13 @@ export async function PATCH(
     if (body.cover_image !== undefined) updateData.cover_image = body.cover_image
     if (body.category !== undefined) updateData.category = body.category
     if (body.categories !== undefined) updateData.categories = body.categories
+    // 发布时更新状态和发布时间
+    if (body.publish === true) {
+      updateData.status = 'published'
+      updateData.published_at = new Date().toISOString()
+      updateData.flagged_content = null
+      updateData.flagged_reason = null
+    }
 
     const { data, error } = await adminClient
       .from('projects')
