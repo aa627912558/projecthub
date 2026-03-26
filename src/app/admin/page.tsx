@@ -621,8 +621,8 @@ function ProjectEditModal({
   const [tagsInput, setTagsInput] = useState(project.tags.join(', '))
   const [coverImage, setCoverImage] = useState(project.cover_image)
 
-  // 常用分类选项（多选）
-  const categoryOptions = ['网创项目', 'AI项目', '副业', '工具推荐', '资源分享', '技术教程', '变现方法', '小红书运营']
+  // 常用分类选项（多选）— 固定4个分类
+  const categoryOptions = ['实体项目', '网创项目', '副业', 'AI项目']
 
   // 从 tagsInput 解析出标签数组
   const parseTags = (input: string) => {
