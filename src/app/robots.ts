@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next'
 
 export default function robots(): MetadataRoute.Robots {
-  const CANONICAL_DOMAIN = 'https://jingxuanai.com'
+  const CANONICAL_DOMAIN = 'https://www.xiangmupai.com'
 
   return {
     rules: [
