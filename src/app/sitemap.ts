@@ -3,8 +3,8 @@ export const dynamic = 'force-dynamic'
 import { MetadataRoute } from 'next'
 
 const CANONICAL_DOMAIN = 'https://xiangmupai.com'
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://xxfpsmreaktaugrzsoto.supabase.co'
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_NLNYkDI4HGUn90D9BzmAqw_7sSeosxv'
+const SUPABASE_URL = 'https://xxfpsmreaktaugrzsoto.supabase.co'
+const SUPABASE_ANON_KEY = 'sb_publishable_NLNYkDI4HGUn90D9BzmAqw_7sSeosxv'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = CANONICAL_DOMAIN
