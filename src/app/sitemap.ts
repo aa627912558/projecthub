@@ -2,9 +2,8 @@ import { MetadataRoute } from 'next'
 import { createAdminClient } from '@/lib/supabase-server'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // Canonical domain — always use jingxuanai.com for sitemap URLs
-  // to avoid Vercel preview URLs (e.g. jingxuanai-com.vercel.app) being indexed
-  const CANONICAL_DOMAIN = 'https://jingxuanai.com'
+  // Canonical domain — always use xiangmupai.com for sitemap URLs
+  const CANONICAL_DOMAIN = 'https://xiangmupai.com'
 
   const siteUrl = CANONICAL_DOMAIN
 
@@ -14,18 +13,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 1,
-    },
-    {
-      url: `${siteUrl}/news`,
-      lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 0.9,
-    },
-    {
-      url: `${siteUrl}/about`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.5,
     },
     {
       url: `${siteUrl}/submit`,
@@ -38,37 +25,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const supabase = await createAdminClient()
 
-    // Fetch tools
-    const { data: tools } = await supabase
-      .from('tools')
-      .select('slug, published_at, updated_at')
-      .eq('status', 'published')
-      .order('published_at', { ascending: false })
-      .limit(1000)
-
-    const toolPages: MetadataRoute.Sitemap = (tools || []).map((t) => ({
-      url: `${siteUrl}/tool/${t.slug}`,
-      lastModified: new Date(t.published_at || t.updated_at),
-      changeFrequency: 'weekly',
-      priority: 0.8,
-    }))
-
-    // Fetch news articles
-    const { data: news } = await supabase
-      .from('news_articles')
+    // Fetch published projects
+    const { data: projects } = await supabase
+      .from('projects')
       .select('slug, published_at, updated_at')
       .eq('status', 'published')
       .order('published_at', { ascending: false })
       .limit(500)
 
-    const newsPages: MetadataRoute.Sitemap = (news || []).map((n) => ({
-      url: `${siteUrl}/news/${n.slug}`,
-      lastModified: new Date(n.published_at || n.updated_at),
-      changeFrequency: 'daily',
-      priority: 0.6,
+    const projectPages: MetadataRoute.Sitemap = (projects || []).map((p) => ({
+      url: `${siteUrl}/projects/${p.slug}`,
+      lastModified: new Date(p.published_at || p.updated_at),
+      changeFrequency: 'weekly',
+      priority: 0.8,
     }))
 
-    return [...staticPages, ...toolPages, ...newsPages]
+    return [...staticPages, ...projectPages]
   } catch (err) {
     console.error('Sitemap generation error:', err)
     return staticPages
