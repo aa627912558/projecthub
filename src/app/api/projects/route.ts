@@ -145,6 +145,23 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // 🔁 去重检查：同一作者不能重复发布同名项目
+    const { data: existingProject } = await supabase
+      .from('projects')
+      .select('id, title, status, published_at')
+      .eq('author_id', user.id)
+      .eq('title', result.data.title)
+      .in('status', ['published', 'pending'])
+      .maybeSingle()
+
+    if (existingProject) {
+      const statusMsg = existingProject.status === 'published' ? '已发布' : '待审核'
+      return NextResponse.json(
+        { error: `此项目已提交过（${statusMsg}），请勿重复发布。如需更新，请编辑已有项目。` },
+        { status: 409 }
+      )
+    }
+
     // AI内容审核 - 检测敏感内容
     const moderationResult = moderateProject({
       title: result.data.title,
