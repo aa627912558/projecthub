@@ -37,7 +37,7 @@ export async function generateMetadata(): Promise<Metadata> {
       follow: true,
     },
     verification: {
-      baidu: 'codeva-5NtTrGRHab',
+      baidu: ['codeva-5NtTrGRHab', 'codeva-xBTSUoD9uu'],
     },
   }
 }
