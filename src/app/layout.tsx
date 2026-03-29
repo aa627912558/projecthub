@@ -1,3 +1,4 @@
+// 2026-03-30 百度SEO验证
 import type { Metadata } from 'next'
 import './globals.css'
 import { Header } from '@/components/Header'
