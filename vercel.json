@@ -3,6 +3,15 @@
   "outputDirectory": ".next",
   "framework": "nextjs",
   "regions": ["iad1"],
+  "headers": [
+    {
+      "source": "/baidu_verify_*.html",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" },
+        { "key": "Content-Type", "value": "text/html; charset=utf-8" }
+      ]
+    }
+  ],
   "env": {
     "NEXT_PUBLIC_SUPABASE_URL": "https://xxfpsmreaktaugrzsoto.supabase.co",
     "NEXT_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_NLNYkDI4HGUn90D9BzmAqw_7sSeosxv"
