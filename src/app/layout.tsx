@@ -76,10 +76,6 @@ export default async function RootLayout({
   return (
     <html lang="zh-CN">
       <body className="min-h-screen flex flex-col">
-        <head>
-          <meta name="baidu-site-verification" content="codeva-5NtTrGRHab" />
-          <meta name="baidu-site-verification" content="codeva-xBTSUoD9uu" />
-        </head>
         <Header user={profile} />
         <main className="flex-1">{children}</main>
         <Footer />
