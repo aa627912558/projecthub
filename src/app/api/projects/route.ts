@@ -4,6 +4,11 @@ import { projectSchema } from '@/lib/schemas'
 import { generateSlug } from '@/lib/utils'
 import { moderateProject } from '@/lib/moderation'
 
+// 信任的作者ID：发布文章无需审核，直接发布
+const TRUSTED_AUTHOR_IDS = [
+  '22ad0bcc-4b4d-4e11-a9af-3800ef3fcfd0', // 灵笔猴
+]
+
 // Generate a deterministic seed from a string
 function stringToSeed(str: string): number {
   let hash = 0
@@ -163,19 +168,25 @@ export async function POST(req: NextRequest) {
     }
 
     // AI内容审核 - 检测敏感内容
-    const moderationResult = moderateProject({
-      title: result.data.title,
-      description: result.data.description,
-      project_url: result.data.project_url || '',
-      cover_image: result.data.cover_image || '',
-      category: result.data.category,
-    })
-
-    console.log('[Content Moderation]', {
-      isClean: moderationResult.isClean,
-      flaggedCount: moderationResult.flaggedContent.length,
-      reason: moderationResult.reason,
-    })
+    // 信任作者的发布直接通过，不走审核
+    const isTrustedAuthor = TRUSTED_AUTHOR_IDS.includes(user.id)
+    let moderationResult = { isClean: true, flaggedContent: [], reason: '' }
+    if (!isTrustedAuthor) {
+      moderationResult = moderateProject({
+        title: result.data.title,
+        description: result.data.description,
+        project_url: result.data.project_url || '',
+        cover_image: result.data.cover_image || '',
+        category: result.data.category,
+      })
+      console.log('[Content Moderation]', {
+        isClean: moderationResult.isClean,
+        flaggedCount: moderationResult.flaggedContent.length,
+        reason: moderationResult.reason,
+      })
+    } else {
+      console.log('[Content Moderation] Trusted author, skipping check')
+    }
 
     // 自动生成封面图
     let coverImage: string
