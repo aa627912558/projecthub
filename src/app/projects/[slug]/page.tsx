@@ -145,7 +145,7 @@ export default async function ProjectPage({
             <>
               <span className="mx-2 text-gray-400">/</span>
               <Link
-                href={`/?category=${encodeURIComponent(project.category)}`}
+                href={`/category/${encodeURIComponent(project.category)}`}
                 className="text-accent hover:text-accent-hover"
               >
                 {project.category}
@@ -193,7 +193,7 @@ export default async function ProjectPage({
           {project.tags.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {project.tags.map((tag) => (
-                <TagBadge key={tag} tag={tag} />
+                <TagBadge key={tag} tag={tag} href={`/tags/${encodeURIComponent(tag)}`} />
               ))}
             </div>
           )}

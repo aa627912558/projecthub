@@ -37,10 +37,9 @@ export async function generateMetadata(): Promise<Metadata> {
       index: true,
       follow: true,
     },
-    other: [
-      { name: 'baidu-site-verification', content: 'codeva-5NtTrGRHab' },
-      { name: 'baidu-site-verification', content: 'codeva-xBTSUoD9uu' },
-    ],
+    other: {
+      'baidu-site-verification': 'codeva-5NtTrGRHab',
+    },
   }
 }
 

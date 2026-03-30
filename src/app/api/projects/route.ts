@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient, createAdminClient } from '@/lib/supabase-server'
 import { projectSchema } from '@/lib/schemas'
 import { generateSlug } from '@/lib/utils'
-import { moderateProject } from '@/lib/moderation'
+import { moderateProject, type ModerationResult } from '@/lib/moderation'
 
 // 信任的作者ID：发布文章无需审核，直接发布
 const TRUSTED_AUTHOR_IDS = [
   '22ad0bcc-4b4d-4e11-a9af-3800ef3fcfd0', // 灵笔猴
+  'aa6ad861-0382-4d1d-b664-eaabc8fc3a52', // 灵笔猴测试账号
 ]
 
 // Generate a deterministic seed from a string
@@ -170,7 +171,18 @@ export async function POST(req: NextRequest) {
     // AI内容审核 - 检测敏感内容
     // 信任作者的发布直接通过，不走审核
     const isTrustedAuthor = TRUSTED_AUTHOR_IDS.includes(user.id)
-    let moderationResult = { isClean: true, flaggedContent: [], reason: '' }
+    let moderationResult: ModerationResult = {
+      isClean: true,
+      flaggedContent: [],
+      sanitizedContent: {
+        title: result.data.title,
+        description: result.data.description,
+        project_url: result.data.project_url || '',
+        cover_image: result.data.cover_image || '',
+        category: result.data.category,
+      },
+      reason: '',
+    }
     if (!isTrustedAuthor) {
       moderationResult = moderateProject({
         title: result.data.title,
