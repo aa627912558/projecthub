@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic'
 
 import { MetadataRoute } from 'next'
 
-const CANONICAL_DOMAIN = 'https://xiangmupai.com'
+const CANONICAL_DOMAIN = 'https://www.xiangmupai.com'
 const SUPABASE_URL = 'https://xxfpsmreaktaugrzsoto.supabase.co'
 const SUPABASE_ANON_KEY = 'sb_publishable_NLNYkDI4HGUn90D9BzmAqw_7sSeosxv'
 
