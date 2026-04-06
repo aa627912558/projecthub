@@ -37,24 +37,14 @@ export function Footer() {
           </div>
 
           <div>
-            <h4 className="font-semibold text-gray-900 mb-4">关注我们</h4>
+            <h4 className="font-semibold text-gray-900 mb-4">联系我们</h4>
             <ul className="space-y-2 text-sm">
               <li>
                 <a
-                  href="https://github.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href="mailto:442996592ai@gmail.com"
                   className="text-gray-500 hover:text-accent transition-colors"
                 >
-                  GitHub
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/rss.xml"
-                  className="text-gray-500 hover:text-accent transition-colors"
-                >
-                  RSS 订阅
+                  联系邮箱：442996592ai@gmail.com
                 </a>
               </li>
             </ul>
