@@ -10,27 +10,51 @@
   },
   "redirects": [
     {
-      "source": "/(.*)",
+      "source": "/",
       "has": [
         { "type": "host", "value": "xiangmupai.com" }
       ],
-      "destination": "https://www.xiangmupai.com$1",
+      "destination": "https://www.xiangmupai.com/",
       "permanent": true
     },
     {
-      "source": "/(.*)",
+      "source": "/:path*",
+      "has": [
+        { "type": "host", "value": "xiangmupai.com" }
+      ],
+      "destination": "https://www.xiangmupai.com/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/",
       "has": [
         { "type": "host", "value": "www.xiangmupai.cn" }
       ],
-      "destination": "https://www.xiangmupai.com$1",
+      "destination": "https://www.xiangmupai.com/",
       "permanent": true
     },
     {
-      "source": "/(.*)",
+      "source": "/:path*",
+      "has": [
+        { "type": "host", "value": "www.xiangmupai.cn" }
+      ],
+      "destination": "https://www.xiangmupai.com/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/",
       "has": [
         { "type": "host", "value": "xiangmupai.cn" }
       ],
-      "destination": "https://www.xiangmupai.com$1",
+      "destination": "https://www.xiangmupai.com/",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        { "type": "host", "value": "xiangmupai.cn" }
+      ],
+      "destination": "https://www.xiangmupai.com/:path*",
       "permanent": true
     }
   ]
