@@ -9,7 +9,7 @@ const SUPABASE_ANON_KEY = 'sb_publishable_NLNYkDI4HGUn90D9BzmAqw_7sSeosxv'
 
 async function getProjects() {
   try {
-    const url = `${SUPABASE_URL}/rest/v1/projects?select=slug,published_at,updated_at&status=eq.published&order=published_at.desc&limit=500`
+    const url = `${SUPABASE_URL}/rest/v1/projects?select=slug,published_at,created_at&status=eq.published&order=published_at.desc&limit=500`
     
     const response = await fetch(url, {
       method: 'GET',
@@ -73,7 +73,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const projectPages: MetadataRoute.Sitemap = projects.map((p: any) => ({
     url: `${siteUrl}/projects/${p.slug}`,
-    lastModified: new Date(p.published_at || p.updated_at),
+    lastModified: new Date(p.published_at || p.created_at),
     changeFrequency: 'weekly',
     priority: 0.8,
   }))
