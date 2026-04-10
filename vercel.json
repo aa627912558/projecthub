@@ -5,7 +5,8 @@
   "regions": ["iad1"],
   "env": {
     "NEXT_PUBLIC_SUPABASE_URL": "https://xxfpsmreaktaugrzsoto.supabase.co",
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_NLNYkDI4HGUn90D9BzmAqw_7sSeosxv"
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_NLNYkDI4HGUn90D9BzmAqw_7sSeosxv",
+    "NEXT_PUBLIC_SITE_URL": "https://www.xiangmupai.com"
   },
   "redirects": [
     {
