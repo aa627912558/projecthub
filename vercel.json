@@ -6,5 +6,31 @@
   "env": {
     "NEXT_PUBLIC_SUPABASE_URL": "https://xxfpsmreaktaugrzsoto.supabase.co",
     "NEXT_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_NLNYkDI4HGUn90D9BzmAqw_7sSeosxv"
-  }
+  },
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [
+        { "type": "host", "value": "xiangmupai.com" }
+      ],
+      "destination": "https://www.xiangmupai.com$1",
+      "permanent": true
+    },
+    {
+      "source": "/(.*)",
+      "has": [
+        { "type": "host", "value": "www.xiangmupai.cn" }
+      ],
+      "destination": "https://www.xiangmupai.com$1",
+      "permanent": true
+    },
+    {
+      "source": "/(.*)",
+      "has": [
+        { "type": "host", "value": "xiangmupai.cn" }
+      ],
+      "destination": "https://www.xiangmupai.com$1",
+      "permanent": true
+    }
+  ]
 }
