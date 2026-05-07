@@ -25,6 +25,10 @@ export interface Project {
   rejection_reason?: string
   flagged_content?: FlaggedItem[] | null
   flagged_reason?: string | null
+  subtitle?: string        // 变现亮点
+  target_audience?: string // 适合人群
+  estimated_income?: string // 预估收益
+  warnings?: string        // 注意事项
   created_at: string
   published_at?: string
 }

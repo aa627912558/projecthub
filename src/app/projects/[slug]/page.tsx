@@ -170,9 +170,14 @@ export default async function ProjectPage({
 
         {/* Header */}
         <header className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
             {project.title}
           </h1>
+
+          {/* Subtitle - 变现亮点 */}
+          {project.subtitle && (
+            <p className="text-lg text-accent font-medium mb-4">{project.subtitle}</p>
+          )}
 
           {/* Meta */}
           <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 mb-4">
@@ -187,6 +192,25 @@ export default async function ProjectPage({
               <Calendar className="w-4 h-4" />
               {formatDate(project.published_at || project.created_at)}
             </span>
+          </div>
+
+          {/* Special Info Tags - 适合人群 / 预估收益 / 注意事项 */}
+          <div className="flex flex-wrap gap-3 mt-4 mb-4">
+            {project.target_audience && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 text-sm rounded-full font-medium border border-blue-200">
+                👥 适合人群：{project.target_audience}
+              </span>
+            )}
+            {project.estimated_income && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 text-orange-700 text-sm rounded-full font-medium border border-orange-200">
+                💰 预估收益：{project.estimated_income}
+              </span>
+            )}
+            {project.warnings && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-700 text-sm rounded-full font-medium border border-red-200">
+                ⚠️ 注意事项：{project.warnings}
+              </span>
+            )}
           </div>
 
           {/* Tags */}
