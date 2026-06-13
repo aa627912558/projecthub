@@ -4,9 +4,6 @@
  * 
  * Fetches AI news from RSS feeds, generates summaries using MiniMax API,
  * and stores them in Supabase as news_articles.
- * 
- * Usage: npx ts-node scripts/generate-news-summaries.ts
- *        node scripts/generate-news-summaries.ts
  */
 
 import { createClient } from '@supabase/supabase-js'
@@ -19,34 +16,34 @@ const MINIMAX_API_KEY = process.env.MINIMAX_API_Key || process.env.MINIMAX_API_K
 // RSS feeds to fetch
 const RSS_FEEDS = [
   {
-    name: '机器之心',
-    url: 'https:// RSS Feed',
-    tags: ['AI', '机器学习'],
-    source_url: 'https://ai.google/',
+    name: 'AI News',
+    url: 'https://www.artificialintelligence-news.com/feed/',
+    tags: ['AI', '人工智能', '行业动态'],
+    source_url: 'https://www.artificialintelligence-news.com/',
   },
   {
-    name: '量子位',
-    url: 'https:// RSS Feed',
-    tags: ['AI', '科技'],
-    source_url: 'https://liangzibit.com/',
+    name: 'TechCrunch',
+    url: 'https://techcrunch.com/feed/',
+    tags: ['AI', '科技', '创业'],
+    source_url: 'https://techcrunch.com/',
   },
   {
-    name: 'AI研习社',
-    url: 'https:// RSS Feed',
-    tags: ['AI', '深度学习'],
-    source_url: 'https://ai.google.dev/',
+    name: 'Wired',
+    url: 'https://www.wired.com/feed/rss',
+    tags: ['AI', '科技', '数字文化'],
+    source_url: 'https://www.wired.com/',
   },
   {
-    name: 'OpenAI Blog',
-    url: 'https:// RSS Feed',
-    tags: ['AI', 'OpenAI'],
-    source_url: 'https://openai.com/',
+    name: 'MIT Tech Review',
+    url: 'https://www.technologyreview.com/feed',
+    tags: ['AI', '前沿科技', '深度分析'],
+    source_url: 'https://www.technologyreview.com/',
   },
   {
-    name: 'Product Hunt',
-    url: 'https:// RSS Feed',
-    tags: ['AI工具', '产品'],
-    source_url: 'https://producthunt.com/',
+    name: 'Science News',
+    url: 'https://www.sciencenews.org/feed',
+    tags: ['AI', '科学', '研究'],
+    source_url: 'https://www.sciencenews.org/',
   },
 ]
 
@@ -114,6 +111,49 @@ function extractTextContent(item: RssItem): string {
   return stripHtml(raw).substring(0, 2000)
 }
 
+// Simple XML tag extractor
+function extractTag(xml: string, tag: string): string {
+  // Try CDATA: <tag><![CDATA[content]]></tag>
+  const cdataPattern = '<' + tag + '[^>]*><![CDATA['
+  const cdataStart = xml.indexOf('<![CDATA[')
+  if (cdataStart !== -1) {
+    const beforeCdata = xml.substring(0, cdataStart)
+    const tagStart = beforeCdata.lastIndexOf('<' + tag)
+    if (tagStart !== -1) {
+      const cdataEnd = xml.indexOf(']]>', cdataStart)
+      if (cdataEnd !== -1) {
+        const content = xml.substring(cdataStart + 9, cdataEnd) // 9 = len('<![CDATA[')
+        return content.trim()
+      }
+    }
+  }
+  
+  // Try simple: <tag>content</tag>
+  const simpleStart = xml.indexOf('<' + tag + '>')
+  if (simpleStart !== -1) {
+    const contentStart = simpleStart + tag.length + 2
+    const endPattern = '</' + tag + '>'
+    const endPos = xml.indexOf(endPattern, contentStart)
+    if (endPos !== -1) {
+      return xml.substring(contentStart, endPos).trim()
+    }
+  }
+  
+  // Try self-closing or attribute style: <tag attr="val">content</tag>
+  const attrPattern = '<' + tag + ' '
+  const attrStart = xml.indexOf(attrPattern)
+  if (attrStart !== -1) {
+    const contentStart = xml.indexOf('>', attrStart) + 1
+    const endPattern = '</' + tag + '>'
+    const endPos = xml.indexOf(endPattern, contentStart)
+    if (endPos !== -1) {
+      return xml.substring(contentStart, endPos).trim()
+    }
+  }
+  
+  return ''
+}
+
 // ============ RSS FETCHER ============
 async function fetchRss(feed: { name: string; url: string; tags: string[]; source_url: string }): Promise<RssFeed> {
   console.log(`📡 Fetching RSS: ${feed.name} (${feed.url})`)
@@ -137,59 +177,59 @@ async function fetchRss(feed: { name: string; url: string; tags: string[]; sourc
     }
     
     const xml = await response.text()
-    
-    // Simple RSS parser (no external dependencies)
     const items: RssItem[] = []
-    const itemRegex = /<item>([\s\S]*?)<\/item>/gi
-    let match
     
-    while ((match = itemRegex.exec(xml)) !== null) {
-      const itemXml = match[1]
+    // Extract items using simple string parsing
+    let itemStart = 0
+    while (true) {
+      const itemTagStart = xml.indexOf('<item>', itemStart)
+      if (itemTagStart === -1) break
+      const itemTagEnd = xml.indexOf('</item>', itemTagStart)
+      if (itemTagEnd === -1) break
       
-      const getTag = (tag: string): string => {
-        const regex = new RegExp(`<${tag}[^>]*><!\[CDATA\[([\s\S]*?)\]\]><\/${tag}>|<${tag}[^>]*>([\s\S]*?)<\/${tag}>`, 'i')
-        const m = itemXml.match(regex)
-        return m ? (m[1] || m[2] || '').trim() : ''
-      }
+      const itemXml = xml.substring(itemTagStart + 6, itemTagEnd)
       
-      const title = getTag('title')
-      const link = getTag('link')
+      const title = extractTag(itemXml, 'title')
+      const link = extractTag(itemXml, 'link')
       
       if (title && link) {
         items.push({
           title,
           link,
-          pubDate: getTag('pubDate') || getTag('dc:date') || new Date().toISOString(),
-          description: getTag('description'),
-          creator: getTag('dc:creator') || getTag('author'),
-          content: getTag('content:encoded'),
+          pubDate: extractTag(itemXml, 'pubDate') || extractTag(itemXml, 'dc:date') || new Date().toISOString(),
+          description: extractTag(itemXml, 'description'),
+          creator: extractTag(itemXml, 'dc:creator') || extractTag(itemXml, 'author'),
+          content: extractTag(itemXml, 'content:encoded') || extractTag(itemXml, 'content'),
         })
       }
+      
+      itemStart = itemTagEnd + 7
     }
     
-    // Fallback: try atom format
+    // Fallback: atom format
     if (items.length === 0) {
-      const entryRegex = /<entry>([\s\S]*?)<\/entry>/gi
-      while ((match = entryRegex.exec(xml)) !== null) {
-        const entryXml = match[1]
-        const getTag = (tag: string): string => {
-          const regex = new RegExp(`<${tag}[^>]*><!\[CDATA\[([\s\S]*?)\]\]><\/${tag}>|<${tag}[^>]*>([\s\S]*?)<\/${tag}>|<${tag}[^>]*href="([^"]*)"`, 'i')
-          const m = entryXml.match(regex)
-          return m ? (m[1] || m[2] || m[3] || '').trim() : ''
-        }
+      let entryStart = 0
+      while (true) {
+        const entryTagStart = xml.indexOf('<entry>', entryStart)
+        if (entryTagStart === -1) break
+        const entryTagEnd = xml.indexOf('</entry>', entryTagStart)
+        if (entryTagEnd === -1) break
         
-        const title = getTag('title')
-        const link = getTag('link')
+        const entryXml = xml.substring(entryTagStart + 7, entryTagEnd)
+        
+        const title = extractTag(entryXml, 'title')
+        const link = extractTag(entryXml, 'link')
         
         if (title) {
           items.push({
             title,
-            link,
-            pubDate: getTag('published') || getTag('updated') || new Date().toISOString(),
-            description: getTag('summary') || getTag('content'),
-            creator: getTag('author'),
+            link: link || '',
+            pubDate: extractTag(entryXml, 'published') || extractTag(entryXml, 'updated') || new Date().toISOString(),
+            description: extractTag(entryXml, 'summary') || extractTag(entryXml, 'content'),
           })
         }
+        
+        entryStart = entryTagEnd + 8
       }
     }
     
@@ -238,16 +278,23 @@ ${content.substring(0, 1500)}
         model: 'MiniMax-Text-01',
         messages: [
           {
-            role: 'system',
-            content: '你是一个专业的中文科技资讯编辑，擅长撰写新闻摘要。'
-          },
-          {
             role: 'user',
+            sender_name: 'user',
+            sender_type: 'USER',
             content: prompt
           }
         ],
+        bot_setting: [{
+          bot_name: 'assistant',
+          content: '你是一个专业的中文科技资讯编辑，擅长撰写新闻摘要。'
+        }],
+        reply_constraints: {
+          role: 'assistant',
+          sender_type: 'BOT',
+          sender_name: 'assistant'
+        },
         temperature: 0.3,
-        max_tokens: 500,
+        tokens_to_generate: 500,
       }),
       signal: controller.signal,
     })
@@ -260,8 +307,8 @@ ${content.substring(0, 1500)}
       return generateFallbackSummary(content)
     }
 
-    const data = await response.json()
-    const summary = data?.choices?.[0]?.message?.content?.trim()
+    const data = await response.json() as any
+    const summary = (data?.reply || '').trim()
 
     if (summary) {
       return summary.substring(0, 300)
@@ -296,7 +343,7 @@ async function checkExisting(slug: string): Promise<boolean> {
   try {
     const supabase = getSupabaseClient()
     const { data } = await supabase
-      .from('news_articles')
+      .from('articles')
       .select('id')
       .eq('slug', slug)
       .single()
@@ -310,19 +357,18 @@ async function saveArticle(article: NewsArticle): Promise<void> {
   const supabase = getSupabaseClient()
   
   const { error } = await supabase
-    .from('news_articles')
+    .from('articles')
     .insert({
-      slug: article.slug,
       title: article.title,
-      summary: article.summary,
-      source_name: article.source_name,
-      source_url: article.source_url,
-      original_url: article.original_url,
-      published_at: article.published_at,
-      cover_image: article.cover_image || null,
-      tags: article.tags,
+      content: article.summary,
+      slug: article.slug,
+      source: article.source_name,
+      link: article.original_url,
+      lang: 'zh',
       status: 'published',
+      pub_date: article.published_at,
     })
+
 
   if (error) {
     if (error.code === '23505') {
@@ -428,7 +474,7 @@ async function main() {
       await new Promise(resolve => setTimeout(resolve, 1000))
     } catch (err) {
       errors++
-      console.error(`  ❌ Error processing: ${item.title.substring(0, 40)}:`, err)
+      console.error(`  ❌ Error processing: ${item.title.substring(0, 40)}`, err)
     }
   }
 
